@@ -958,6 +958,7 @@ let totalWrong = 0;
 let EXAM_SECONDS = 30 * 60; // 30 minutos de examen
 let remainingSeconds = 0;
 let timerInterval = null;
+let currentOptions = []; // opciones mezcladas de la pregunta actual
 
 function updateLiveScore(){
   const puntosAciertos = totalCorrect * 0.5;
@@ -1012,17 +1013,7 @@ function timeIsOver(){
   // Mostrar el resultado con lo que lleves
   showResult();
 }
-function showResult(){
-  if (timerInterval) {
-    clearInterval(timerInterval);
-    timerInterval = null;
-  }
 
-  // opcional: dejar claro que el tiempo terminó o se detuvo
-  // $("timer").innerHTML = "Tiempo: fin";
-
-  // ... resto de tu showResult como lo tienes ...
-}
 // INICIAR EXAMEN (SIN REPETIR)
 // =====================================================
 $("restartBtn").onclick = function(){
@@ -1089,62 +1080,73 @@ function loadQuestion(){
   $("nextBtn").style.display    = "none";
   $("explanation").style.display = "block";
 
-  // 1) Creamos una copia de las opciones guardando su índice original
+  // 1) Creamos copia con índice original
   const opcionesMezcladas = q.options.map((texto, i) => ({
     texto: texto,
-    indexOriginal: i       // este es el índice que se compara con q.correctIndex
+    indexOriginal: i
   }));
 
-  // 2) Mezclamos el array (Fisher–Yates)
+  // 2) Mezclamos
   for (let i = opcionesMezcladas.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
     [opcionesMezcladas[i], opcionesMezcladas[j]] =
       [opcionesMezcladas[j], opcionesMezcladas[i]];
   }
 
-  // 3) Pintamos las opciones ya mezcladas
+  // 3) Guardamos el orden mezclado en una variable global
+  currentOptions = opcionesMezcladas;
+
+  // 4) Pintamos botones
   opcionesMezcladas.forEach(op => {
     const btn = document.createElement("button");
     btn.className = "option";
     btn.innerHTML = op.texto;
-
-    // OJO: aquí le pasamos el índice ORIGINAL a handleAnswer
     btn.onclick = () => handleAnswer(op.indexOriginal);
-
     $("options").appendChild(btn);
   });
-}
-
+} // 👈 ESTA LLAVE ES LA QUE TE FALTABA
 // =====================================================
 // RESPUESTA
 // =====================================================
 function handleAnswer(idx){
-  const q = selectedQuestions[currentIndex];
+  const q    = selectedQuestions[currentIndex];
   const btns = document.querySelectorAll(".option");
 
-  btns.forEach((b,i)=>{
-    b.disabled = true;
-    if(i === q.correctIndex) b.classList.add("correct");
-    if(i === idx && i !== q.correctIndex) b.classList.add("incorrect");
+  btns.forEach((b, i) => {
+    b.disabled = true; // bloquear todas
+
+    const optInfo = currentOptions[i]; // info de la opción que está en ese botón
+
+    // pintar en verde la opción correcta (la que tenga el índice original correcto)
+    if (optInfo.indexOriginal === q.correctIndex){
+      b.classList.add("correct");
+    }
+
+    // si esta opción es la que ha elegido el usuario y NO es correcta → roja
+    if (optInfo.indexOriginal === idx && idx !== q.correctIndex){
+      b.classList.add("incorrect");
+    }
   });
 
-  if (idx === q.correctIndex) {
-    totalCorrect++;   // sumamos acierto
+  // Lógica de aciertos/fallos
+  if (idx === q.correctIndex){
+    totalCorrect++;
     $("feedback").innerHTML =
       "<span style='color:green;'>¡Correcto!</span>";
   } else {
-    totalWrong++;     // sumamos fallo
+    totalWrong++;
     $("feedback").innerHTML =
       "<span style='color:red;'>Incorrecto</span>";
   }
 
-  updateLiveScore();          // ⬅️ actualizamos el marcador
+  updateLiveScore();
   $("explanation").innerHTML = q.explanation;
 
   $("nextBtn").innerHTML =
-    currentIndex === selectedQuestions.length - 1
+    (currentIndex === selectedQuestions.length - 1)
       ? "Ver resultado"
       : "Siguiente";
+
   $("nextBtn").style.display = "inline-block";
   $("nextBtn").onclick = nextQuestion;
 }
