@@ -46,12 +46,59 @@ select, button { padding:8px 12px; border-radius:4px; font-size:14px; }
   text-align: right;
   margin-bottom: 4px;
 }
+#firma{
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+  padding: 15px 0;
+  font-style: italic;
+}
+.card{
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  margin: 0 auto 25px auto;
+  max-width: 600px;
+  text-align: center; /* 🔵 TODO CENTRADO */
+}
+
+#instrucciones h3{
+  margin-top: 0;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: #2c3e50;
+}
+
+#instrucciones ul{
+  list-style: none;      /* 🔵 Sin puntos */
+  padding: 0;
+  margin: 0;
+  color: #444;
+  font-size: 0.9rem;
+  line-height: 1.4rem;
+}
+
+#instrucciones ul li{
+  margin-bottom: 6px;
+}
 </style>
 </head>
 
 <body>
 
-<h1>Test Civil – 14 Temas</h1>
+<h1>Tests Civil 1: parte general y persona</h1>
+<div id="instrucciones" class="card">
+  <h3>Cómo funciona:</h3>
+  <ul>
+    <li>Elige un tema para generar el examen.</li>
+    <li>Las 20 preguntas se seleccionan sin repetir.</li>
+    <li>Las respuestas también aparecen en orden aleatorio.</li>
+    <li>Dispones de un cronómetro activo.</li>
+    <li>El sistema calcula tu nota como en la UNED.</li>
+  </ul>
+</div>
 
 <div id="controls">
   <label>Tema:</label>
@@ -85,6 +132,9 @@ select, button { padding:8px 12px; border-radius:4px; font-size:14px; }
   <div id="feedback"></div>
   <div id="explanation"></div>
   <div id="finalResult"></div>
+  <div id="firma">
+  © by M. García
+  </div>
   <button id="nextBtn" style="display:none;">Siguiente</button>
 </div>
 
@@ -1019,9 +1069,9 @@ function timeIsOver(){
 $("restartBtn").onclick = function(){
   const tema = $("temaSelect").value;
 
-  let candidates = (tema==="all")
+  let candidates = (tema === "all")
     ? [...masterQuestions]
-    : masterQuestions.filter(q=>q.tema == tema);
+    : masterQuestions.filter(q => q.tema == tema);
 
   // preguntas que aún no he usado
   let remaining = candidates.filter(q => !usedIds.includes(q.id));
@@ -1045,10 +1095,16 @@ $("restartBtn").onclick = function(){
   totalCorrect  = 0;
   totalWrong    = 0;
 
+  // 🔵 OCULTAR INSTRUCCIONES AL EMPEZAR
+  $("instrucciones").style.display = "none";
+
+  // (opcional) ocultar también el selector de tema
+  // $("temaSelect").style.display = "none";
+
   // mostrar el contenedor del examen
   $("questionContainer").style.display = "block";
 
-  // ⏱ ARRANCAR EL CRONÓMETRO AQUÍ
+  // ⏱ ARRANCAR EL CRONÓMETRO
   startTimer();
 
   // actualizar marcador de aciertos/fallos/nota provisoria
@@ -1057,7 +1113,6 @@ $("restartBtn").onclick = function(){
   // cargar la primera pregunta
   loadQuestion();
 };
-
 // =====================================================
 // CARGAR PREGUNTA
 // =====================================================
