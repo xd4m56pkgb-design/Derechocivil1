@@ -1,0 +1,1219 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>Test Civil – 14 Temas / Sin Repetición</title>
+
+<style>
+body { font-family: Arial; max-width: 800px; margin:20px auto; background:#f5f7fb; }
+h1 { text-align:center; margin-bottom:10px; }
+#controls { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+select, button { padding:8px 12px; border-radius:4px; font-size:14px; }
+#restartBtn { background:#3498db; color:white; border:none; }
+#restartBtn:hover { background:#2c80b8; }
+
+#questionContainer {
+  background:#fff; padding:20px; border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1); display:none;
+}
+
+.option {
+  display:block; width:100%; padding:10px; margin:5px 0;
+  background:#fafafa; border:1px solid #ccc; border-radius:4px; cursor:pointer;
+}
+.option.correct { background:#e5ffe5; border-color:green; }
+.option.incorrect { background:#ffe5e5; border-color:red; }
+
+#explanation {
+  margin-top:15px; padding:12px; background:#eef2f7;
+  border-left:4px solid #3498db;
+}
+
+#nextBtn {
+  margin-top:15px; padding:8px 12px; border:none;
+  background:#27ae60; color:white; border-radius:4px; cursor:pointer;
+}
+#liveScore{
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 8px;
+  text-align: right;
+}
+#timer{
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #c0392b;      /* rojito examen */
+  text-align: right;
+  margin-bottom: 4px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Test Civil – 14 Temas</h1>
+
+<div id="controls">
+  <label>Tema:</label>
+  <select id="temaSelect">
+    <option value="all">Examen final</option>
+    <option value="1">Tema 1</option>
+    <option value="2">Tema 2</option>
+    <option value="3">Tema 3</option>
+    <option value="4">Tema 4</option>
+    <option value="5">Tema 5</option>
+    <option value="6">Tema 6</option>
+    <option value="7">Tema 7</option>
+    <option value="8">Tema 8</option>
+    <option value="9">Tema 9</option>
+    <option value="10">Tema 10</option>
+    <option value="11">Tema 11</option>
+    <option value="12">Tema 12</option>
+    <option value="13">Tema 13</option>
+    <option value="14">Tema 14</option>
+  </select>
+
+  <button id="restartBtn">Iniciar Test</button>
+</div>
+
+<div id="questionContainer">
+  <div id="questionCounter"></div>
+    <div id="timer"></div>
+  <div id="liveScore"></div>
+  <div id="questionText"></div>
+  <div id="options"></div>
+  <div id="feedback"></div>
+  <div id="explanation"></div>
+  <div id="finalResult"></div>
+  <button id="nextBtn" style="display:none;">Siguiente</button>
+</div>
+
+
+<script>
+// =====================================================
+// CONFIGURACIÓN
+// =====================================================
+const MAX_EXAM_QUESTIONS = 20;  // 20 preguntas por examen
+let usedIds = [];               // no repetir dentro de la misma sesión
+
+// =====================================================
+// (AQUÍ PEGARÁS TUS 280 PREGUNTAS A FUTURO)
+// =====================================================
+const masterQuestions = [
+
+  /* ===================== TEMA 1 (PEGAR TUS 20 AQUÍ) ===================== */
+  /* ===================== TEMA 1 – 20 PREGUNTAS ===================== */
+
+{
+  tema: 1,
+  text: "Según el Tema 1, identificar el Derecho civil únicamente con los grandes códigos modernos es insuficiente porque:",
+  options: [
+    "Los códigos recogen solo normas históricas ya derogadas",
+    "El Derecho civil ha seguido evolucionando con nuevas leyes y realidades sociales",
+    "Los códigos modernos nunca tuvieron relevancia en la configuración del Derecho civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo explica que los grandes códigos civiles del siglo XIX fueron una forma histórica fundamental del Derecho civil, pero no lo agotaron. Tras la codificación, la realidad social y económica siguió transformándose y el legislador aprobó numerosas leyes especiales y reformas. Por eso el Derecho civil actual no puede identificarse solo con el Código, sino con un conjunto dinámico de normas civiles, de modo que la respuesta correcta es la que alude a su evolución mediante nuevas leyes y realidades sociales."
+},
+
+{
+  tema: 1,
+  text: "La concepción historicista del Derecho civil pone el acento en:",
+  options: [
+    "La permanencia de principios invariables",
+    "La mutabilidad de las normas civiles según el contexto histórico",
+    "La identificación absoluta del Derecho civil con el Código Civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La concepción historicista entiende el Derecho civil como el resultado de un proceso evolutivo ligado a la historia de la sociedad. Según esta perspectiva, las instituciones civiles cambian con las transformaciones sociales, políticas y económicas, y solo se comprenden plenamente si se analizan en ese contexto. Por ello, la opción correcta es la que destaca la mutabilidad de las normas civiles y su dependencia del contexto histórico."
+},
+
+{
+  tema: 1,
+  text: "La concepción apriorística del Derecho civil resalta:",
+  options: [
+    "La negación de todo elemento racional",
+    "La existencia de principios relativamente estables en el Derecho civil",
+    "Que el Derecho civil es puramente político"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La concepción apriorística busca en el Derecho civil ciertos principios estructurales que se mantienen, con matices, a lo largo del tiempo. A partir de esos principios se reconstruye racionalmente el sistema, dotándolo de coherencia interna más allá de los cambios puntuales de las leyes. No niega la historia, pero pone el foco en los elementos de continuidad, de ahí que la respuesta correcta sea la que habla de principios relativamente estables."
+},
+
+{
+  tema: 1,
+  text: "La contraposición entre concepción historicista y apriorística:",
+  options: [
+    "Tiene más valor didáctico que real",
+    "Es una división rígida e irreconciliable",
+    "Carece totalmente de utilidad"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El manual indica que la oposición entre planteamientos historicistas y apriorísticos sirve sobre todo como recurso pedagógico para explicar dos formas de acercarse al Derecho civil. En la práctica científica, las posiciones puras son raras y los autores combinan el análisis histórico con la reconstrucción racional de principios. Por eso se afirma que la contraposición tiene más valor didáctico que real, que es precisamente la opción correcta."
+},
+
+{
+  tema: 1,
+  text: "Los supuestos institucionales del Derecho civil son:",
+  options: [
+    "Tribunales que aplican el Derecho",
+    "Hechos sociales repetidos que originan la regulación civil",
+    "Principios constitucionales que informan el ordenamiento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Los supuestos institucionales se describen como problemas materiales que se repiten en la convivencia social, como los relativos a la familia, la propiedad o las sucesiones. Esos conflictos fácticos, al repetirse históricamente, obligan al legislador a dar respuestas jurídicas relativamente estables, dando lugar a instituciones civiles. Por eso la respuesta acertada es la que los define como hechos sociales y conflictos repetidos que originan la regulación civil."
+},
+
+{
+  tema: 1,
+  text: "La perspectiva histórica de los supuestos institucionales muestra que:",
+  options: [
+    "Los problemas materiales permanecen, pero cambian las soluciones jurídicas",
+    "Las instituciones civiles han sido siempre iguales",
+    "El Derecho civil no tiene relación con la realidad social"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo subraya que, a lo largo del tiempo, los grandes problemas de fondo —persona, familia, patrimonio— se mantienen, mientras las respuestas jurídicas van variando. La historia del Derecho civil permite comprobar esa continuidad de los conflictos y la evolución de las soluciones normativas. La opción correcta es, por tanto, la que afirma que los problemas materiales persisten pero las respuestas jurídicas cambian."
+},
+
+{
+  tema: 1,
+  text: "La codificación civil del siglo XIX se considera un hito porque:",
+  options: [
+    "Agotó por completo el Derecho civil",
+    "Sistematizó la experiencia jurídica previa en un cuerpo coherente",
+    "Eliminó todas las instituciones anteriores"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La codificación se presenta como un momento clave porque cristaliza y ordena la experiencia jurídica acumulada durante siglos. Los códigos civiles reúnen y sistematizan el material normativo disperso, ofreciéndolo en un texto claro y articulado. No obstante, el manual insiste en que no agotaron el contenido del Derecho civil, por lo que la respuesta correcta es la que destaca su función de sistematizar la experiencia previa."
+},
+
+{
+  tema: 1,
+  text: "La codificación del siglo XIX constituye sobre todo:",
+  options: [
+    "Un punto de partida metodológico",
+    "El límite absoluto del Derecho civil",
+    "Un sistema cerrado e inmutable"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El texto explica que los códigos civiles se convierten en la base metodológica desde la que se ha estudiado y enseñado el Derecho civil. Fijan una estructura y un lenguaje técnico que condicionan la doctrina posterior. Sin embargo, el sistema ha seguido ampliándose con leyes especiales y reformas, por lo que la codificación actúa más como punto de partida metodológico que como límite definitivo, que es justamente lo que recoge la opción correcta."
+},
+
+{
+  tema: 1,
+  text: "El núcleo del Derecho civil está formado por:",
+  options: [
+    "La estructura del Estado",
+    "La persona, la familia y el patrimonio",
+    "El Derecho penal y administrativo"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo identifica como núcleo propio del Derecho civil las instituciones relativas a la persona, a la organización y protección de la familia y a la ordenación del patrimonio. Estos tres ámbitos concentran los problemas básicos de la vida privada, sobre los que gira el conjunto de la disciplina. Por ello la respuesta correcta es la que menciona la persona, la familia y el patrimonio como eje central del Derecho civil."
+},
+
+{
+  tema: 1,
+  text: "La enseñanza del Derecho civil en España se organiza tradicionalmente en:",
+  options: [
+    "Tres bloques: personas, bienes y acciones",
+    "Cuatro bloques: Parte General; Obligaciones; Derechos reales; Familia y Sucesiones",
+    "Dos bloques: Derecho público y privado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La docencia del Derecho civil en las universidades españolas sigue un esquema consolidado en cuatro grandes bloques: una Parte General, el Derecho de obligaciones y contratos, los derechos reales (junto al Derecho hipotecario) y el Derecho de familia y sucesiones. Este modelo procede de la ciencia jurídica alemana y se ha impuesto por su claridad didáctica. Por eso la opción correcta es la que enuncia precisamente esos cuatro bloques."
+},
+
+{
+  tema: 1,
+  text: "El Código Civil español responde principalmente al modelo:",
+  options: [
+    "Romano-francés",
+    "Alemán",
+    "Anglosajón"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Código Civil español se enmarca en la tradición romano-francesa inaugurada por el Code Napoléon. Su estructura gira en torno a las personas, los bienes y los modos de adquirir, complementada con un libro específico de obligaciones y contratos. No sigue, por tanto, el patrón de amplia Parte General propio del modelo alemán. Por ello la respuesta correcta es la que señala el modelo romano-francés."
+},
+
+{
+  tema: 1,
+  text: "El Derecho civil es Derecho privado porque:",
+  options: [
+    "Regula relaciones entre particulares en plano de igualdad",
+    "Organiza la estructura política del Estado",
+    "Es idéntico al Derecho mercantil"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El manual encuadra el Derecho civil dentro del Derecho privado porque regula relaciones entre sujetos que se encuentran, en principio, en un plano de igualdad jurídica. Las partes actúan sin poderes de supremacía unos sobre otros, a diferencia de lo que ocurre en el Derecho público, donde la Administración ejerce potestades de autoridad. Por eso la respuesta correcta es la que resalta esa igualdad formal entre particulares."
+},
+
+{
+  tema: 1,
+  text: "En el Derecho civil predominan:",
+  options: [
+    "Normas dispositivas",
+    "Normas imperativas",
+    "Normas penales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo destaca que en el ámbito civil abundan las normas de carácter dispositivo o supletorio. Estas normas proporcionan una solución general para los casos en que las partes no pactan nada distinto, pero pueden ser desplazadas por la autonomía de la voluntad dentro de los límites de la ley y el orden público. Este predominio de normas dispositivas es una nota típica del Derecho civil, de ahí que la opción correcta sea la primera."
+},
+
+{
+  tema: 1,
+  text: "En el Derecho público predominan:",
+  options: [
+    "Normas dispositivas",
+    "Normas imperativas de ius cogens",
+    "Normas opcionales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Derecho público, que regula la organización del Estado y el ejercicio de potestades públicas, se caracteriza por el predominio de normas imperativas de ius cogens. Estas normas no pueden ser modificadas por acuerdos entre particulares y responden a la idea de interés general. El contraste con el Derecho civil es claro, por lo que la respuesta correcta es la que alude a las normas imperativas de ius cogens."
+},
+
+{
+  tema: 1,
+  text: "La distinción público/privado:",
+  options: [
+    "No aparece en la Constitución pero mantiene utilidad",
+    "Está definida de forma expresa en la Constitución",
+    "Carece totalmente de relevancia práctica"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El texto aclara que la Constitución no recoge de forma literal la clásica división entre Derecho público y Derecho privado. Sin embargo, esta distinción conserva un notable valor histórico, sistemático y didáctico, y sigue utilizándose para ordenar la enseñanza y la dogmática jurídica. Además, tiene repercusiones prácticas en el reparto de competencias entre los distintos órdenes jurisdiccionales, lo que justifica la respuesta correcta."
+},
+
+{
+  tema: 1,
+  text: "Esta distinción público/privado es especialmente útil para:",
+  options: [
+    "Determinar la jerarquía normativa",
+    "Determinar la competencia jurisdiccional",
+    "Determinar la oficialidad de las lenguas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El manual resalta que la división entre Derecho público y Derecho privado ayuda a fijar qué orden jurisdiccional debe conocer de cada tipo de conflicto. Así, los litigios de carácter privado corresponderán normalmente a la jurisdicción civil o social, mientras que los de Derecho público serán competencia de la jurisdicción contencioso-administrativa o penal. Por eso la opción adecuada es la que alude a la determinación de la competencia jurisdiccional."
+},
+
+{
+  tema: 1,
+  text: "Considerar el Derecho civil como Derecho común significa:",
+  options: [
+    "Derecho privado general y supletorio",
+    "Un derecho reservado a especialistas",
+    "El derecho penal"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo explica que el Derecho civil actúa como tronco común del que se han separado otras ramas, como el Derecho mercantil o el Derecho laboral. Además, desempeña una función supletoria, aplicándose cuando no existe una regulación especial para un determinado supuesto. Esta doble idea de Derecho privado general y supletorio justifica que se le denomine Derecho común, que es precisamente lo que recoge la respuesta correcta."
+},
+
+{
+  tema: 1,
+  text: "Tras la reforma de 1974, el art. 4.3 CC establece que sus disposiciones:",
+  options: [
+    "Se aplicarán como supletorias en materias reguladas por otras leyes",
+    "Solo se aplican si una ley especial lo ordena",
+    "Quedan excluidas si hay leyes especiales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La reforma del Título Preliminar de 1974 introdujo expresamente en el Código Civil la función supletoria de sus normas respecto de otras leyes. El artículo 4.3 dispone que las disposiciones del Código se aplicarán como supletorias en las materias que ya estén reguladas por otras leyes, reforzando así la posición del civil como Derecho común. Por ello, la opción correcta es la que menciona esa aplicación supletoria."
+},
+
+{
+  tema: 1,
+  text: "Hoy se entiende por Derecho común:",
+  options: [
+    "Solo el Código Civil",
+    "El conjunto del Derecho civil: Código, leyes especiales y normas forales civiles",
+    "Las normas exclusivamente estatales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El manual aclara que ya no puede identificarse el Derecho común únicamente con el Código Civil. En la actualidad, el Derecho civil en sentido amplio incluye también numerosas leyes especiales y normas de origen foral que regulan instituciones civiles. Todo ese conjunto —Código, legislación especial y Derecho foral civil— integra el verdadero Derecho común. Por eso la respuesta acertada es la que recoge esa visión amplia del Derecho civil."
+},
+
+{
+  tema: 1,
+  text: "El concepto moderno de Derecho civil en sentido amplio incluye:",
+  options: [
+    "Únicamente las instituciones del Código Civil de 1889",
+    "El Código Civil junto con leyes especiales y normas civiles forales",
+    "Solo las leyes civiles aprobadas después de 1978"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El manual explica que el Derecho civil contemporáneo ya no se identifica solo con el Código Civil. La evolución normativa ha generado un amplio conjunto de leyes especiales que regulan materias como familia, responsabilidad civil, vivienda o protección de consumidores. A esto se suma la pervivencia y desarrollo de los Derechos civiles forales en distintos territorios. Por eso, el concepto moderno de Derecho civil en sentido amplio integra el Código, las leyes especiales y las normas forales civiles, que actúan conjuntamente como parte del sistema civil."
+},
+ /* ===================== TEMA 2 – 20 PREGUNTAS ===================== */
+
+{
+  tema: 2,
+  text: "El movimiento codificador europeo nace principalmente como respuesta a:",
+  options: [
+    "La necesidad de reforzar la autoridad de los jueces",
+    "El desorden legislativo fragmentado del Antiguo Régimen",
+    "El auge del Derecho canónico durante la Edad Moderna"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo explica que la legislación anterior al siglo XIX estaba compuesta por un mosaico de fueros, privilegios y normas locales que dificultaban la seguridad jurídica. El movimiento codificador surge para poner fin a este caos normativo mediante un Derecho claro, sistemático y uniforme. Por eso la respuesta correcta es la que alude al desorden legislativo heredado del Antiguo Régimen."
+},
+
+{
+  tema: 2,
+  text: "La Ilustración y el iusracionalismo transforman el concepto de 'código' en:",
+  options: [
+    "Un simple conjunto de leyes dispersas",
+    "Un cuerpo jurídico racional, coherente y uniforme",
+    "Una guía interpretativa para los jueces"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Según el texto, el racionalismo ilustrado dio al código un sentido moderno: debía ser un conjunto sistemático de normas basado en razones claras, accesibles para los ciudadanos y aplicable de forma general. Frente a la dispersión medieval, se buscaba un Derecho ordenado y completo. Por ello, la opción correcta es la que lo define como un cuerpo jurídico racional y uniforme."
+},
+
+{
+  tema: 2,
+  text: "El Código Civil francés de 1804 se considera:",
+  options: [
+    "Un texto menor sin influencia más allá de Francia",
+    "El inicio del ciclo moderno de la codificación",
+    "Una recopilación medieval actualizada"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Código Napoleónico inauguró la etapa moderna de la codificación civil y se convirtió en modelo en toda Europa y América. Representó un Derecho claro, sistemático y adecuado a los valores liberales. Por eso la respuesta correcta es la que lo señala como inicio del ciclo codificador moderno."
+},
+
+{
+  tema: 2,
+  text: "El BGB alemán de 1896 se caracteriza por:",
+  options: [
+    "Su carácter improvisado y poco sistemático",
+    "Ser la culminación técnica del ideal codificador",
+    "Tener una influencia mínima en la dogmática civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo indica que el BGB representa la máxima expresión del método científico-jurídico del siglo XIX, con una estructura extremadamente clara y una técnica depurada. Por eso se considera la culminación del ideal codificador, y esa es la opción correcta."
+},
+
+{
+  tema: 2,
+  text: "La codificación tuvo también un propósito político consistente en:",
+  options: [
+    "Aumentar los privilegios territoriales",
+    "Consolidar la igualdad civil y reforzar la unidad estatal",
+    "Transferir competencias a los jueces locales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Además de su dimensión jurídica, la codificación buscaba eliminar los privilegios del Antiguo Régimen y afirmar el poder legislativo del Estado moderno. Su objetivo era dotar a todos los ciudadanos de un marco jurídico igual y uniforme. Por ello, la respuesta acertada es la que menciona la igualdad civil y la unidad estatal."
+},
+
+{
+  tema: 2,
+  text: "La codificación civil española se caracterizó por:",
+  options: [
+    "Ser temprana y sencilla",
+    "Ser tardía y llena de obstáculos políticos y técnicos",
+    "Haberse completado ya en el siglo XVIII"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La elaboración del Código Civil español se prolongó durante casi todo el siglo XIX debido a la diversidad legislativa histórica y a la pervivencia de los Derechos forales. Esto hizo que el proceso fuera lento y complejo. Por tanto, la respuesta correcta es que fue tardía y dificultosa."
+},
+
+{
+  tema: 2,
+  text: "Uno de los principales obstáculos para la codificación española fue:",
+  options: [
+    "La falta de juristas formados",
+    "La existencia de Derechos forales muy arraigados",
+    "La ausencia de Constitución"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo subraya que la pluralidad foral era el principal problema: territorios como Navarra, Aragón o Cataluña querían conservar su Derecho civil propio. Esta resistencia dificultó enormemente la construcción de un código único. Por eso la opción correcta es la que señala los Derechos forales."
+},
+
+{
+  tema: 2,
+  text: "El Proyecto de Código Civil de 1851 fracasó porque:",
+  options: [
+    "Era excesivamente breve",
+    "Suprimía radicalmente los Derechos forales y seguía muy de cerca el modelo francés",
+    "No regulaba el derecho de propiedad"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El proyecto de 1851, muy afrancesado y abiertamente unificador, proponía eliminar los sistemas forales. Esta postura generó una fuerte oposición política, lo que condujo a su fracaso. Por ello, la respuesta correcta es la que menciona su afrancesamiento y su intento de abrogación foral."
+},
+
+{
+  tema: 2,
+  text: "Tras el fracaso del proyecto de 1851, la estrategia legislativa consistió en:",
+  options: [
+    "Detener toda reforma hasta nuevo consenso",
+    "Aprobar leyes especiales en materias clave",
+    "Eliminar los registros públicos para simplificar el sistema"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Durante la segunda mitad del siglo XIX se aprobaron numerosas leyes especiales (Aguas, Matrimonio civil, Registro Civil, Hipotecaria…) que modernizaron sectores importantes del Derecho privado mientras se aplazaba la codificación completa. Por eso la opción correcta es la que menciona estas leyes especiales."
+},
+
+{
+  tema: 2,
+  text: "La aprobación del Código Civil de 1889 fue posible gracias a:",
+  options: [
+    "La Ley de Bases de 1888",
+    "La presión del Tribunal Supremo",
+    "La supresión de los Derechos forales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El texto destaca que la Ley de Bases de 1 de mayo de 1888 fijó los principios que debía seguir la Comisión de Códigos y dio el impulso político imprescindible para completar la codificación. En consecuencia, la opción correcta es la que menciona dicha Ley de Bases."
+},
+
+{
+  tema: 2,
+  text: "El Código Civil de 1889 se concibió como:",
+  options: [
+    "Un texto unitario que incorpora parcialmente el Derecho foral mediante supletoriedad",
+    "Un código puramente consuetudinario",
+    "Un sistema que derogaba por completo toda norma anterior"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Código Civil integró un Derecho común aplicable en todo el territorio, pero admitiendo la pervivencia de instituciones forales mediante la técnica de la supletoriedad. No eliminó los Derechos forales, sino que los subordinó al sistema general. Por ello, la opción correcta es la primera."
+},
+
+{
+  tema: 2,
+  text: "Desde su aprobación, el Código Civil español ha sido:",
+  options: [
+    "Un texto inmutable y rígido",
+    "Un texto duradero pero adaptable mediante reformas",
+    "Un texto sin relevancia práctica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo muestra que, aunque el Código Civil ha permanecido más de un siglo en vigor, ha sido objeto de reformas profundas, especialmente tras la Constitución de 1978. Ha demostrado capacidad de adaptación sin perder su estructura básica. Por eso la respuesta correcta es que es duradero pero reformable."
+},
+
+{
+  tema: 2,
+  text: "La llamada 'cuestión foral' surgió por:",
+  options: [
+    "El debate sobre la Corona",
+    "El conflicto entre el Derecho civil común y los Derechos forales",
+    "La oposición entre el Derecho civil y el Derecho penal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La cuestión foral expresa la tensión histórica entre la aspiración estatal de unificar el Derecho civil y la defensa de los ordenamientos propios de territorios como Navarra, Aragón o Cataluña. Esta dualidad marcó todo el proceso codificador. Por eso la respuesta correcta es la que alude al conflicto entre Derecho común y foral."
+},
+
+{
+  tema: 2,
+  text: "La Ley de Bases de 1888, respecto a los Derechos forales, estableció que:",
+  options: [
+    "Debían derogarse de inmediato",
+    "Se conservarían 'por ahora' en toda su integridad y podrían integrarse como apéndices",
+    "Se convertirían en costumbres sin aplicación legal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La Ley de Bases optó por una solución de compromiso: mantener provisionalmente los Derechos forales y prever su incorporación al Código mediante apéndices. Este mecanismo pretendía compatibilizar unidad y diversidad. Por eso la opción correcta es la segunda."
+},
+
+{
+  tema: 2,
+  text: "La técnica de los 'apéndices' fracasó porque:",
+  options: [
+    "Nunca se redactó ninguno",
+    "Solo llegó a aprobarse el de Aragón y no hubo continuidad",
+    "Fue declarada inconstitucional"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo indica que el sistema de apéndices apenas tuvo recorrido: únicamente Aragón aprobó el suyo en 1926. La falta de respaldo político y la oposición foralista impidieron su desarrollo. Por ello, la opción correcta es la que señala que solo se aprobó el apéndice aragonés."
+},
+
+{
+  tema: 2,
+  text: "Las Compilaciones forales del siglo XX se crearon para:",
+  options: [
+    "Sustituir el Código Civil estatal",
+    "Sistematizar y actualizar el Derecho civil propio de cada territorio",
+    "Convertir los fueros en meras costumbres no vinculantes"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Tras el fracaso de los apéndices, las Compilaciones surgieron como el instrumento adecuado para organizar y modernizar el Derecho foral vigente en cada región. Permitieron conservar sus instituciones tradicionales dentro de un marco legal moderno. Por eso la opción correcta es la segunda."
+},
+
+{
+  tema: 2,
+  text: "Entre las Compilaciones forales aprobadas entre 1959 y 1973 se encuentran:",
+  options: [
+    "Madrid, Andalucía, Canarias y Navarra",
+    "Vizcaya y Álava, Cataluña, Baleares, Galicia, Aragón y Navarra",
+    "Solo Navarra"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo enumera seis Compilaciones: Vizcaya-Álava (1959), Cataluña (1960), Baleares (1961), Galicia (1963), Aragón (1967) y Navarra (1973). Estas fueron la base del mantenimiento y actualización del Derecho foral hasta la Constitución. Por ello, la respuesta correcta es la segunda."
+},
+
+{
+  tema: 2,
+  text: "El artículo 149.1.8 de la Constitución establece que las Comunidades Autónomas con Derecho civil propio pueden:",
+  options: [
+    "Legislar en todo el Derecho civil sin límites",
+    "Conservar, modificar y desarrollar su Derecho civil dentro de los límites constitucionales",
+    "Aprobar leyes penales propias"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La Constitución reconoce al Estado la competencia civil general, pero permite a las Comunidades con Derecho foral conservarlo y desarrollarlo dentro de ciertos márgenes. El Tribunal Constitucional ha precisado estos límites, diferenciando materias estatales y autonómicas. Por eso la opción correcta es la que recoge esta capacidad condicionada."
+},
+
+{
+  tema: 2,
+  text: "Según el Tribunal Constitucional, la competencia autonómica en materia civil:",
+  options: [
+    "Es ilimitada y puede modificar cualquier institución civil",
+    "Es inexistente salvo en materia de costumbre",
+    "Está limitada por materias reservadas al Estado, aunque permite desarrollo foral en otras áreas"
+  ],
+  correctIndex: 2,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Tribunal Constitucional ha establecido que existen ámbitos del Derecho civil —como las bases de las obligaciones o las normas generales de contratos— que son competencia exclusiva del Estado. Sin embargo, las Comunidades con Derecho foral pueden desarrollar su normativa propia en aquellos sectores reconocidos como suyos. De ahí que la opción correcta sea la tercera."
+},
+
+{
+  tema: 2,
+  text: "Tras la Constitución de 1978, los Derechos forales han evolucionado hacia:",
+  options: [
+    "Una progresiva desaparición",
+    "Un notable pluralismo con reformas profundas en varios territorios",
+    "Un modelo uniforme idéntico al Código Civil estatal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo muestra que, tras los Estatutos de Autonomía, territorios como Cataluña, Navarra, Galicia, Aragón o Baleares han desarrollado de forma intensa su Derecho civil, llegando incluso algunos a aprobar códigos civiles propios. El resultado es un pluralismo notable dentro del marco constitucional. Por ello, la opción correcta es la que destaca este pluralismo y la evolución profunda de los Derechos forales."
+},
+
+  /* ===================== TEMA 3 ===================== */
+ {
+  tema: 3,
+  text: "La diferencia esencial entre norma jurídica y disposición normativa es que:",
+  options: [
+    "La disposición tiene siempre mayor fuerza",
+    "La norma es el mandato regulador y la disposición su soporte",
+    "Ambas expresan lo mismo sin distinción técnica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo explica que la norma contiene el mandato regulador, mientras que la disposición es únicamente la forma escrita mediante la cual ese mandato se expresa. Esta distinción permite entender que la norma puede existir sin texto, como ocurre con la costumbre, y que una disposición puede albergar varias normas distintas. Diferenciar contenido y soporte evita confundir literalidad y sentido jurídico. Por ello, la respuesta correcta es la que distingue entre mandato normativo y expresión formal."
+},
+{
+  tema: 3,
+  text: "Toda norma jurídica está compuesta por:",
+  options: [
+    "Un hecho generador y sanción",
+    "Un supuesto de hecho y una consecuencia jurídica",
+    "Un presupuesto administrativo y autorización"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Toda norma combina un supuesto de hecho que describe la situación regulada y una consecuencia jurídica que establece los efectos que deben producirse cuando ese supuesto se cumple. Esta estructura condicional es esencial para comprender cómo opera el Derecho en la práctica y cómo los jueces aplican las normas. La distinción permite identificar qué hechos activan cada consecuencia jurídica. Por ello, la opción correcta es la que recoge esta estructura básica."
+},
+{
+  tema: 3,
+  text: "La generalidad de la norma jurídica implica que:",
+  options: [
+    "Afecta a un único sujeto identificado",
+    "Afecta a una pluralidad indeterminada de personas",
+    "Solo se aplica a funcionarios públicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo destaca que la norma se dirige a grupos indeterminados de personas, no a individuos concretos, lo que asegura un tratamiento igualitario en situaciones equivalentes. Esta generalidad permite que la misma regla se aplique a cualquier sujeto que encaje en el supuesto previsto. Así se garantiza uniformidad en la aplicación del Derecho civil. Por ello, la opción correcta es la que recoge esta amplitud de destinatarios."
+},
+{
+  tema: 3,
+  text: "La abstracción normativa significa que la norma:",
+  options: [
+    "Regula casos individuales uno a uno",
+    "Formula un supuesto tipo aplicable a múltiples situaciones",
+    "Solo puede aplicarse mediante sentencia judicial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La abstracción implica que la norma no se redacta para un hecho concreto, sino para un modelo general de situaciones comparables. Esto permite utilizar la misma norma en casos diferentes que compartan los elementos esenciales del supuesto descrito. Gracias a esta técnica, el Derecho mantiene coherencia y continuidad. Por ello, la respuesta correcta es la que alude a su carácter general y no casuístico."
+},
+{
+  tema: 3,
+  text: "Es Derecho especial el conjunto de normas que:",
+  options: [
+    "Tienen rango inferior a la ley",
+    "Regulan sectores o grupos específicos",
+    "Solo rigen en el ámbito penal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo explica que el Derecho especial regula ámbitos concretos como el mercantil o el laboral, diferenciándose del Derecho común que actúa como tronco general. Estas normas se aplican preferentemente cuando existe regulación específica sobre una materia. Este criterio se basa en la especialidad, no en la jerarquía. Por ello, la opción correcta es la que identifica el carácter sectorial del Derecho especial."
+},
+{
+  tema: 3,
+  text: "El Derecho particular se caracteriza por:",
+  options: [
+    "Vigencia en todo el territorio nacional",
+    "Aplicarse en áreas geográficas limitadas",
+    "Tener rango superior a la Constitución"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Derecho particular incluye normas territoriales como los Derechos forales o costumbres locales, que rigen solo dentro de un ámbito geográfico concreto. Esta diversidad convive con el Derecho estatal gracias a la distribución territorial del ordenamiento. Su aplicación depende del territorio, no del rango jurídico. Por ello, la opción correcta es la que menciona su vigencia limitada territorialmente."
+},
+{
+  tema: 3,
+  text: "Las normas imperativas o de ius cogens se caracterizan por:",
+  options: [
+    "Admitir pacto en contrario",
+    "Imponer mandatos obligatorios e inderogables",
+    "Aplicarse solo en contratos mercantiles"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Las normas imperativas se imponen de manera obligatoria y excluyen cualquier pacto que pretenda modificarlas o dejarlas sin efecto. Protegen intereses generales y fijan límites a la autonomía de la voluntad. Su carácter inderogable asegura coherencia y seguridad en materias esenciales. Por ello, la opción correcta es la que destaca su obligatoriedad estricta."
+},
+{
+  tema: 3,
+  text: "Las normas dispositivas se aplican:",
+  options: [
+    "Siempre de forma obligatoria",
+    "Solo cuando la ley lo ordena expresamente",
+    "Cuando las partes no pactan otra cosa distinta"
+  ],
+  correctIndex: 2,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Las normas dispositivas actúan como regulación supletoria, de modo que se aplican únicamente si las partes no han acordado una solución diferente. Refuerzan la autonomía privada al dejar espacio al pacto. Esta técnica permite adaptar la regulación al caso concreto. Por ello, la opción correcta es la que recoge su carácter supletorio."
+},
+{
+  tema: 3,
+  text: "Según el art. 1.1 del Código Civil, son fuentes del Derecho:",
+  options: [
+    "Ley, costumbre y principios generales",
+    "Ley, jurisprudencia y doctrina",
+    "Reglamento, usos y principios"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El artículo 1 establece que el ordenamiento jurídico se forma por la ley, la costumbre y los principios generales del Derecho. La jurisprudencia no crea Derecho, sino que orienta la interpretación. Esta enumeración determina qué normas pueden aplicarse como fundamento jurídico. Por ello, la opción correcta es la que recoge la lista legal."
+},
+{
+  tema: 3,
+  text: "La ley, como fuente formal, es:",
+  options: [
+    "Una declaración política",
+    "La manifestación escrita del mandato normativo",
+    "Un mero precedente judicial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El capítulo señala que la ley es la forma escrita mediante la cual el legislador expresa las normas jurídicas. Su contenido puede requerir interpretación sistemática más allá de la literalidad. Esta función formal distingue la ley de otras fuentes como la costumbre. Por ello, la opción correcta es la que identifica su papel como soporte formal."
+},
+{
+  tema: 3,
+  text: "Según la Constitución, la potestad legislativa corresponde:",
+  options: [
+    "Al Gobierno",
+    "Al Tribunal Supremo",
+    "A las Cortes Generales y Parlamentos autonómicos"
+  ],
+  correctIndex: 2,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La CE asigna la potestad legislativa al Estado a través de las Cortes Generales, y a las Comunidades Autónomas en materias dentro de sus competencias. Este reparto da lugar a un sistema normativo complejo y distribuido. La elección de la opción correcta exige recordar esta estructura constitucional. Por ello, la respuesta adecuada es la que menciona ambos legisladores."
+},
+{
+  tema: 3,
+  text: "La Constitución de 1978 tiene eficacia normativa porque:",
+  options: [
+    "No tiene fuerza jurídica real",
+    "Es la norma suprema vinculante para todos",
+    "Solo obliga a los poderes públicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La CE es la norma suprema del ordenamiento y vincula a ciudadanos, jueces y poderes públicos. Debe aplicarse directamente y condiciona la validez del resto de normas. Su eficacia normativa garantiza coherencia en todo el sistema jurídico. Por ello, la opción correcta es la que reconoce su carácter vinculante general."
+},
+{
+  tema: 3,
+  text: "Las leyes orgánicas requieren:",
+  options: [
+    "Mayoría absoluta del Congreso",
+    "Mayoría simple",
+    "Un referéndum obligatorio"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El artículo 81 CE exige mayoría absoluta del Congreso para aprobar leyes orgánicas debido a la importancia de las materias que regulan, como derechos fundamentales o estatutos de autonomía. Este refuerzo procedimental refleja su especial relevancia. Por ello, la respuesta correcta es la que señala dicha mayoría."
+},
+{
+  tema: 3,
+  text: "Una ley autonómica prevalece sobre la estatal cuando:",
+  options: [
+    "Es más moderna",
+    "Regula una materia de competencia autonómica",
+    "Ha sido aprobada por referéndum"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El criterio decisivo entre normas estatales y autonómicas es la competencia, no la jerarquía. Si la materia está atribuida a la Comunidad Autónoma, su ley prevalece en ese ámbito, incluso frente a una ley estatal general. Esto deriva del principio de autonomía constitucional. Por ello, la opción correcta es la competencial."
+},
+{
+  tema: 3,
+  text: "El Decreto legislativo se dicta:",
+  options: [
+    "Tras delegación expresa de las Cortes",
+    "Sin intervención parlamentaria",
+    "Solo por urgencia"
+  ],
+  correctIndex: 0,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Decreto legislativo nace de una delegación concreta otorgada por las Cortes Generales mediante ley de bases o ley de delegación. Esta autorización limita el contenido y el alcance del texto aprobado por el Gobierno. Su validez depende del respeto a los términos de la delegación. Por ello, la opción correcta es la que recoge este origen parlamentario."
+},
+{
+  tema: 3,
+  text: "El Decreto-ley se justifica por:",
+  options: [
+    "Razones técnicas",
+    "Extraordinaria y urgente necesidad",
+    "Conveniencia política"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Decreto-ley solo puede dictarse cuando concurren circunstancias de extraordinaria y urgente necesidad, según el art. 86 CE. Además está sujeto a convalidación parlamentaria posterior. Esta herramienta permite responder con rapidez sin sustituir al legislador. Por ello, la opción correcta es la urgencia constitucional."
+},
+{
+  tema: 3,
+  text: "Los Reglamentos se caracterizan por:",
+  options: [
+    "Tener rango superior a la ley",
+    "Ser normas subordinadas que desarrollan la ley",
+    "Tener valor equivalente a una sentencia"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El Reglamento es una norma subordinada que desarrolla, complementa o ejecuta la ley. No puede contradecirla y debe respetar límites de jerarquía y competencia. Su función es operativa dentro del marco legal. Por ello, la respuesta correcta es la que destaca su subordinación."
+},
+{
+  tema: 3,
+  text: "La costumbre se aplica:",
+  options: [
+    "Antes que la ley",
+    "Solo en defecto de ley aplicable",
+    "Cuando el juez lo decide libremente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "El artículo 1.3 CC establece que la costumbre tiene carácter subsidiario y solo se aplica si no existe ley reguladora, siempre que no contradiga la moral ni el orden público. Además debe probarse cuando no es notoria. Por ello, la opción correcta es la que recoge su carácter secundario."
+},
+{
+  tema: 3,
+  text: "Los principios generales del Derecho se aplican:",
+  options: [
+    "Como fuente primaria",
+    "Cuando no existe ley ni costumbre aplicable",
+    "Solo en Derecho mercantil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Los principios generales cumplen una función integradora del sistema jurídico y se aplican cuando ni la ley ni la costumbre ofrecen una solución adecuada. Orientan la interpretación y rellenan lagunas del ordenamiento. Por ello, la opción correcta es la que recoge su carácter subsidiario."
+},
+{
+  tema: 3,
+  text: "Según el art. 1.6 CC, la jurisprudencia complementa el ordenamiento porque:",
+  options: [
+    "Crea normas nuevas",
+    "Reitera criterios del Tribunal Supremo",
+    "Deroga leyes antiguas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "La jurisprudencia no crea normas, pero complementa el ordenamiento al fijar criterios interpretativos reiterados del Tribunal Supremo. Estas líneas doctrinales aportan seguridad jurídica y uniformidad en la aplicación del Derecho. Por ello, la respuesta correcta es la que identifica esta función interpretativa."
+}
+/* ===================== TEMA 4 ===================== */
+
+  /* ===================== ... HASTA EL TEMA 14 ... ===================== */
+
+];
+
+// =====================================================
+// GENERADOR DE IDs
+// =====================================================
+masterQuestions.forEach((q, i) => q.id = i + 1);
+
+// =====================================================
+// UTILIDADES
+// =====================================================
+function $(id){ return document.getElementById(id); }
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let selectedQuestions = [];
+let currentIndex = 0;
+let totalCorrect = 0;
+let totalWrong = 0;
+// ================== CRONÓMETRO ==================
+let EXAM_SECONDS = 30 * 60; // 30 minutos de examen
+let remainingSeconds = 0;
+let timerInterval = null;
+
+function updateLiveScore(){
+  const puntosAciertos = totalCorrect * 0.5;
+  const puntosFallos   = totalWrong * 0.25;
+
+  let notaActual = puntosAciertos - puntosFallos;
+  if (notaActual < 0) notaActual = 0;
+
+  notaActual = Math.round(notaActual * 100) / 100;
+
+  $("liveScore").innerHTML =
+    "Aciertos: " + totalCorrect +
+    " · Fallos: " + totalWrong +
+    " · Nota provis.: " + notaActual.toFixed(2) + " / 10";
+}
+function updateTimerDisplay(){
+  const m = Math.floor(remainingSeconds / 60);
+  const s = remainingSeconds % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  $("timer").innerHTML = "Tiempo: " + mm + ":" + ss;
+}
+function startTimer(){
+  // por si hubiera uno antiguo
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  remainingSeconds = EXAM_SECONDS;
+  updateTimerDisplay();
+
+  timerInterval = setInterval(function(){
+    remainingSeconds--;
+    updateTimerDisplay();
+
+    if (remainingSeconds <= 0){
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timeIsOver();
+    }
+  }, 1000);
+}
+function timeIsOver(){
+  // Desactivar todas las respuestas
+  const btns = document.querySelectorAll(".option");
+  btns.forEach(b => b.disabled = true);
+
+  $("feedback").innerHTML =
+    "<span style='color:red;'>Tiempo agotado. Se cierra el examen.</span>";
+
+  // Mostrar el resultado con lo que lleves
+  showResult();
+}
+function showResult(){
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  // opcional: dejar claro que el tiempo terminó o se detuvo
+  // $("timer").innerHTML = "Tiempo: fin";
+
+  // ... resto de tu showResult como lo tienes ...
+}
+// INICIAR EXAMEN (SIN REPETIR)
+// =====================================================
+$("restartBtn").onclick = function(){
+  const tema = $("temaSelect").value;
+
+  let candidates = (tema==="all")
+    ? [...masterQuestions]
+    : masterQuestions.filter(q=>q.tema == tema);
+
+  // preguntas que aún no he usado
+  let remaining = candidates.filter(q => !usedIds.includes(q.id));
+
+  // si ya he usado todas, reseteo el historial y vuelvo a empezar
+  if (remaining.length === 0){
+    usedIds = [];
+    remaining = candidates;
+  }
+
+  // barajar
+  shuffle(remaining);
+
+  // seleccionar hasta el máximo de preguntas del examen
+  selectedQuestions = remaining.length > MAX_EXAM_QUESTIONS
+    ? remaining.slice(0, MAX_EXAM_QUESTIONS)
+    : remaining;
+
+  // reiniciar índices y marcador
+  currentIndex  = 0;
+  totalCorrect  = 0;
+  totalWrong    = 0;
+
+  // mostrar el contenedor del examen
+  $("questionContainer").style.display = "block";
+
+  // ⏱ ARRANCAR EL CRONÓMETRO AQUÍ
+  startTimer();
+
+  // actualizar marcador de aciertos/fallos/nota provisoria
+  updateLiveScore();
+
+  // cargar la primera pregunta
+  loadQuestion();
+};
+
+// =====================================================
+// CARGAR PREGUNTA
+// =====================================================
+// =====================================================
+// CARGAR PREGUNTA (con respuestas aleatorias)
+// =====================================================
+function loadQuestion(){
+  const q = selectedQuestions[currentIndex];
+
+  // Cabecera (nº de pregunta)
+  $("questionCounter").innerHTML =
+    "Pregunta " + (currentIndex + 1) + " de " + selectedQuestions.length;
+
+  // Limpiar zona de trabajo
+  $("questionText").innerHTML   = q.text;
+  $("options").innerHTML        = "";
+  $("feedback").innerHTML       = "";
+  $("explanation").innerHTML    = "";
+  $("finalResult").innerHTML    = "";
+  $("nextBtn").style.display    = "none";
+  $("explanation").style.display = "block";
+
+  // 1) Creamos una copia de las opciones guardando su índice original
+  const opcionesMezcladas = q.options.map((texto, i) => ({
+    texto: texto,
+    indexOriginal: i       // este es el índice que se compara con q.correctIndex
+  }));
+
+  // 2) Mezclamos el array (Fisher–Yates)
+  for (let i = opcionesMezcladas.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opcionesMezcladas[i], opcionesMezcladas[j]] =
+      [opcionesMezcladas[j], opcionesMezcladas[i]];
+  }
+
+  // 3) Pintamos las opciones ya mezcladas
+  opcionesMezcladas.forEach(op => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerHTML = op.texto;
+
+    // OJO: aquí le pasamos el índice ORIGINAL a handleAnswer
+    btn.onclick = () => handleAnswer(op.indexOriginal);
+
+    $("options").appendChild(btn);
+  });
+}
+
+// =====================================================
+// RESPUESTA
+// =====================================================
+function handleAnswer(idx){
+  const q = selectedQuestions[currentIndex];
+  const btns = document.querySelectorAll(".option");
+
+  btns.forEach((b,i)=>{
+    b.disabled = true;
+    if(i === q.correctIndex) b.classList.add("correct");
+    if(i === idx && i !== q.correctIndex) b.classList.add("incorrect");
+  });
+
+  if (idx === q.correctIndex) {
+    totalCorrect++;   // sumamos acierto
+    $("feedback").innerHTML =
+      "<span style='color:green;'>¡Correcto!</span>";
+  } else {
+    totalWrong++;     // sumamos fallo
+    $("feedback").innerHTML =
+      "<span style='color:red;'>Incorrecto</span>";
+  }
+
+  updateLiveScore();          // ⬅️ actualizamos el marcador
+  $("explanation").innerHTML = q.explanation;
+
+  $("nextBtn").innerHTML =
+    currentIndex === selectedQuestions.length - 1
+      ? "Ver resultado"
+      : "Siguiente";
+  $("nextBtn").style.display = "inline-block";
+  $("nextBtn").onclick = nextQuestion;
+}
+// =====================================================
+// SIGUIENTE
+// =====================================================
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex>=selectedQuestions.length){
+    showResult();
+    return;
+  }
+  loadQuestion();
+}
+
+// =====================================================
+// RESULTADO
+// =====================================================
+function showResult(){
+  // ⏱ DETENER EL CRONÓMETRO SI ESTÁ ACTIVO
+  if (timerInterval){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  $("questionText").innerHTML = "";
+  $("options").innerHTML = "";
+  $("feedback").innerHTML = "";
+  $("explanation").innerHTML = "";
+  $("nextBtn").style.display = "none";
+
+  // Cambiar el texto superior
+  $("questionCounter").innerHTML = "✅ Examen finalizado";
+
+  // Ocultar recuadro de explicación
+  $("explanation").style.display = "none";
+
+  // Registrar preguntas usadas
+  selectedQuestions.forEach(q=>{
+    if(!usedIds.includes(q.id)) usedIds.push(q.id);
+  });
+
+  const total = selectedQuestions.length;
+
+  // 🎯 SISTEMA REAL DE EXAMEN
+  const puntosAciertos = totalCorrect * 0.5;
+  const puntosFallos  = totalWrong * 0.25;
+
+  let notaFinal = puntosAciertos - puntosFallos;
+
+  // Si sale negativo, la nota mínima es 0
+  if (notaFinal < 0) notaFinal = 0;
+
+  // Redondeo a 2 decimales
+  notaFinal = Math.round(notaFinal * 100) / 100;
+
+  // Calificación
+  let calificacion = "";
+  if (notaFinal < 5)       calificacion = "Suspenso";
+  else if (notaFinal < 7)  calificacion = "Aprobado";
+  else if (notaFinal < 9)  calificacion = "Notable";
+  else                     calificacion = "Sobresaliente";
+
+  $("finalResult").innerHTML =
+    "<b>Aciertos:</b> " + totalCorrect + "<br>" +
+    "<b>Fallos:</b> " + totalWrong + "<br>" +
+    "<b>Preguntas totales:</b> " + total + "<br><br>" +
+    "<b>Nota final:</b> " + notaFinal.toFixed(2) + " / 10 (" + calificacion + ")";
+}
+</script>
+</body>
+</html>
