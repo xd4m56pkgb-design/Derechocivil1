@@ -1,0 +1,3371 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<title>DERECHO CIVIL I.1: PARTE GENERAL Y PERSONA</title>
+
+<style>
+body { font-family: Arial; max-width: 800px; margin:20px auto; background:#f5f7fb; }
+h1 { text-align:center; margin-bottom:10px; }
+#controls { display:flex; gap:10px; justify-content:center; margin-bottom:20px; }
+select, button { padding:8px 12px; border-radius:4px; font-size:14px; }
+#restartBtn { background:#3498db; color:white; border:none; }
+#restartBtn:hover { background:#2c80b8; }
+
+#questionContainer {
+  background:#fff; padding:20px; border-radius:8px;
+  box-shadow:0 2px 8px rgba(0,0,0,0.1); display:none;
+}
+
+.option {
+  display:block; width:100%; padding:10px; margin:5px 0;
+  background:#fafafa; border:1px solid #ccc; border-radius:4px; cursor:pointer;
+}
+.option.correct { background:#e5ffe5; border-color:green; }
+.option.incorrect { background:#ffe5e5; border-color:red; }
+
+#explanation {
+  margin-top:15px; padding:12px; background:#eef2f7;
+  border-left:4px solid #3498db;
+}
+
+#nextBtn {
+  margin-top:15px; padding:8px 12px; border:none;
+  background:#27ae60; color:white; border-radius:4px; cursor:pointer;
+}
+#liveScore{
+  font-size: 0.9rem;
+  color: #555;
+  margin-bottom: 8px;
+  text-align: right;
+}
+#timer{
+  font-size: 0.95rem;
+  font-weight: bold;
+  color: #c0392b;      /* rojito examen */
+  text-align: right;
+  margin-bottom: 4px;
+}
+#firma{
+  margin-top: 30px;
+  text-align: center;
+  font-size: 0.85rem;
+  color: #777;
+  padding: 15px 0;
+  font-style: italic;
+}
+.card{
+  background: #ffffff;
+  border-radius: 10px;
+  padding: 18px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.12);
+  margin: 0 auto 25px auto;
+  max-width: 600px;
+  text-align: center; /* 🔵 TODO CENTRADO */
+}
+
+#instrucciones h3{
+  margin-top: 0;
+  font-size: 1.1rem;
+  margin-bottom: 12px;
+  color: #2c3e50;
+}
+
+#instrucciones ul{
+  list-style: none;      /* 🔵 Sin puntos */
+  padding: 0;
+  margin: 0;
+  color: #444;
+  font-size: 0.9rem;
+  line-height: 1.4rem;
+}
+
+#instrucciones ul li{
+  margin-bottom: 6px;
+}
+</style>
+</head>
+
+<body>
+
+<h1>Tests Civil 1: parte general y persona</h1>
+<div id="instrucciones" class="card">
+  <h3>Cómo funciona:</h3>
+  <ul>
+    <li>Elige un tema para generar el examen.</li>
+    <li>Las 20 preguntas se seleccionan sin repetir.</li>
+    <li>Las respuestas también aparecen en orden aleatorio.</li>
+    <li>Dispones de un cronómetro activo.</li>
+    <li>El sistema calcula tu nota como en la UNED.</li>
+  </ul>
+</div>
+
+<div id="controls">
+  <label>Tema:</label>
+  <select id="temaSelect">
+    <option value="all">Examen final</option>
+    <option value="1">TEMA 1 – EL DERECHO CIVIL ESPAÑOL</option>
+    <option value="2">TEMA 2 – FORMACIÓN HISTÓRICA DEL DERECHO CIVIL ESPAÑOL</option>
+    <option value="3">TEMA 3 – LA APLICACIÓN DEL DERECHO CIVIL</option>
+    <option value="4">TEMA 4 – LA APLICACIÓN DE LAS NORMAS JURÍDICAS</option>
+    <option value="5">TEMA 5 – LA EFICACIA DE LAS NORMAS JURÍDICAS</option>
+    <option value="6">TEMA 6 – LOS DERECHOS SUBJETIVOS</option>
+    <option value="7">TEMA 7 – EL EJERCICIO DE LOS DERECHOS</option>
+    <option value="8">TEMA 8 – LA PRESCRIPCIÓN Y LA CADUCIDAD</option>
+    <option value="9">TEMA 9 – LOS DERECHOS SUBJETIVOS Y SU TUTELA</option>
+    <option value="10">TEMA 10 – LOS DERECHOS DE LA PERSONALIDAD</option>
+    <option value="11">TEMA 11 – LA PERSONA FÍSICA: MAYORÍA DE EDAD, CAPACIDAD, EMANCIPACIÓN Y EVOLUCIÓN HISTÓRICA</option>
+    <option value="12">Tema 12</option>
+    <option value="13">Tema 13</option>
+    <option value="14">Tema 14</option>
+    <option value="4">Tema 15</option>
+    <option value="5">Tema 16</option>
+    <option value="6">Tema 17</option>
+    <option value="7">Tema 18</option>
+    <option value="8">Tema 19</option>
+    <option value="9">Tema 20</option>
+    <option value="10">Tema 21</option>
+    <option value="11">Tema 22</option>
+    <option value="12">Tema 23</option>
+    <option value="13">Tema 24</option>
+    <option value="14">Tema 25</option>
+    <option value="14">Tema 26</option>
+  </select>
+
+  <button id="restartBtn">Iniciar Test</button>
+</div>
+
+<div id="questionContainer">
+  <div id="questionCounter"></div>
+    <div id="timer"></div>
+  <div id="liveScore"></div>
+  <div id="questionText"></div>
+  <div id="options"></div>
+  <div id="feedback"></div>
+  <div id="explanation"></div>
+  <div id="finalResult"></div>
+  <div id="firma">
+  © by M.García
+  </div>
+  <button id="nextBtn" style="display:none;">Siguiente</button>
+</div>
+
+
+<script>
+// =====================================================
+// CONFIGURACIÓN
+// =====================================================
+const MAX_EXAM_QUESTIONS = 20;  // 20 preguntas por examen
+let usedIds = [];               // no repetir dentro de la misma sesión
+
+// =====================================================
+// (AQUÍ PEGARÁS TUS 280 PREGUNTAS A FUTURO)
+// =====================================================
+const masterQuestions = [
+
+  // 🟥 TEMA 1 – EL DERECHO CIVIL ESPAÑOL
+
+{
+  tema: 1,
+  text: "¿Por qué hoy se considera insuficiente identificar el Derecho civil únicamente con los grandes códigos del siglo XIX?",
+  options: [
+    "Porque esos códigos nunca llegaron a entrar en vigor",
+    "Porque la realidad social y normativa posterior ha desbordado el contenido originario de los códigos",
+    "Porque los códigos solo regulaban materias penales y administrativas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el Derecho civil no quedó congelado en el Code Napoléon o en el BGB, sino que ha seguido evolucionando con nuevas leyes y cambios sociales. La identificación entre Derecho civil y código solo fue razonable en un primer momento histórico. Hoy se considera insuficiente porque la experiencia normativa posterior ha ampliado y matizado mucho ese contenido codificado inicial."
+},
+
+{
+  tema: 1,
+  text: "La concepción historicista del Derecho civil pone el acento en:",
+  options: [
+    "La existencia de principios inmutables ajenos a la historia",
+    "La evolución histórica de las instituciones y la mutabilidad de las normas",
+    "La supremacía del Derecho constitucional sobre el Derecho civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La concepción historicista entiende el Derecho civil como producto de un devenir histórico concreto. Subraya que las instituciones civiles se adaptan a contextos sociales y políticos cambiantes. Desde esta perspectiva, la clave no está en principios abstractos, sino en la transformación histórica de la regulación de persona, familia y patrimonio."
+},
+
+{
+  tema: 1,
+  text: "La llamada concepción apriorística del Derecho civil se caracteriza por:",
+  options: [
+    "Negar cualquier influencia de la historia en el Derecho civil",
+    "Resaltar la permanencia de ciertos principios generales que dan continuidad a la disciplina",
+    "Identificar el Derecho civil con el Derecho público"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La concepción apriorística, minoritaria, considera que el Derecho civil descansa sobre determinados principios metajurídicos relativamente estables. Estos principios dotan de coherencia al sistema más allá de los cambios históricos. Sin embargo, no desconoce totalmente la evolución histórica, sino que intenta armonizarla con un núcleo racional permanente."
+},
+
+{
+  tema: 1,
+  text: "La contraposición entre concepción historicista y apriorística del Derecho civil:",
+  options: [
+    "Refleja dos bloques doctrinales rígidos e incompatibles",
+    "Tiene sobre todo valor didáctico, pues en la práctica predominan posiciones intermedias",
+    "Ha sido descartada por completo en la doctrina actual"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo destaca que esta oposición sirve para ordenar las ideas, pero rara vez se da en estado puro. La mayoría de las posiciones combinan elementos históricos y racionales. En la práctica, se reconoce que el Derecho civil es a la vez producto de la historia y portador de principios generales que aseguran continuidad y cohesión sistemática."
+},
+
+{
+  tema: 1,
+  text: "Los supuestos institucionales del Derecho civil se entienden como:",
+  options: [
+    "Los órganos jurisdiccionales competentes en materia civil",
+    "Los problemas y conflictos sociales que, repetidos históricamente, originan instituciones jurídicas",
+    "Las decisiones del legislador sobre organización del Estado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los supuestos institucionales son hechos sociales básicos —conflictos, tensiones, litigios— que se repiten a lo largo del tiempo. La respuesta normativa a esos problemas configura el núcleo de las instituciones civiles. El capítulo insiste en que persona, familia y patrimonio son focos constantes de conflicto que explican la formación del Derecho civil."
+},
+
+{
+  tema: 1,
+  text: "La perspectiva histórica de los supuestos institucionales permite apreciar que:",
+  options: [
+    "Los problemas materiales se mantienen, mientras varían las soluciones jurídicas",
+    "Las instituciones civiles permanecen idénticas en todas las épocas",
+    "Los cambios sociales no influyen en el Derecho civil"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El texto subraya que, aunque cambien las normas, los problemas materiales básicos (organización de la familia, circulación de bienes, protección de la persona) se repiten. La historia del Derecho civil muestra un juego continuo entre continuidad de necesidades sociales y variabilidad de respuestas jurídicas. Esa tensión explica la evolución de las instituciones civiles."
+},
+
+{
+  tema: 1,
+  text: "La codificación civil del siglo XIX se presenta en el capítulo como:",
+  options: [
+    "Una forma histórica especialmente relevante, pero no agotadora del contenido del Derecho civil",
+    "Un fenómeno marginal sin importancia para la disciplina",
+    "Un proceso exclusivamente político sin base técnica"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La codificación es descrita como un momento clave porque concentra y ordena experiencias jurídicas previas en grandes textos sistemáticos. Fija un método de exposición y una estructura que siguen siendo referencia. Sin embargo, no agota el Derecho civil, que continúa desarrollándose mediante leyes especiales y reinterpretaciones posteriores."
+},
+
+{
+  tema: 1,
+  text: "Según el capítulo, la codificación civil del siglo XIX debe entenderse sobre todo como:",
+  options: [
+    "Un punto de partida metodológico para comprender la materia civil",
+    "Un cierre definitivo de la evolución jurídica",
+    "Una ruptura absoluta con la tradición anterior"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El texto indica que los códigos civiles sirven como guía para ordenar y estudiar la materia, pero no congelan el sistema. La codificación ofrece un esquema metodológico claro para situar las instituciones, sin impedir reformas ni leyes especiales posteriores. Es, por tanto, un hito histórico y técnico, no un límite infranqueable."
+},
+
+{
+  tema: 1,
+  text: "El núcleo de la materia propia del Derecho civil se articula en torno a:",
+  options: [
+    "La organización del Estado, la Hacienda y el procedimiento",
+    "La persona, la familia y el patrimonio",
+    "Los delitos, las penas y las sanciones administrativas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo insiste en que el Derecho civil gira en torno a tres grandes bloques materiales: la persona como sujeto de derechos, la familia como ámbito de convivencia y el patrimonio como conjunto de bienes y relaciones económicas. Estas tres dimensiones definen el contenido esencial del Derecho civil y explican su función en la vida privada."
+},
+
+{
+  tema: 1,
+  text: "La enseñanza universitaria del Derecho civil en España se ha organizado tradicionalmente en:",
+  options: [
+    "Dos bloques: Derecho público y Derecho privado",
+    "Tres bloques: personas, bienes y acciones",
+    "Cuatro bloques: Parte General, Obligaciones y contratos, Derechos reales e hipotecario, y Familia y sucesiones"
+  ],
+  correctIndex: 2,
+  explanation:
+    "El texto describe la sistemática académica clásica, influida por la tradición alemana: una Parte General que incluye la persona y categorías introductorias; un bloque de obligaciones y contratos; otro de derechos reales e hipotecario; y, finalmente, familia y sucesiones. Esta estructura docente no coincide exactamente con el orden del Código Civil español."
+},
+
+{
+  tema: 1,
+  text: "El modelo académico de enseñanza del Derecho civil (Parte General, Obligaciones, Reales, Familia y Sucesiones) procede principalmente de:",
+  options: [
+    "La tradición alemana y la dogmática de Savigny",
+    "El Derecho anglosajón",
+    "Los Derechos forales españoles"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo explica que este esquema responde a la influencia de la ciencia jurídica alemana del siglo XIX, en particular de Savigny y la pandectística. Frente al modelo romano-francés de personas, bienes y acciones, la sistemática alemana refuerza la Parte General y una ordenación eminentemente conceptual de las instituciones civiles."
+},
+
+{
+  tema: 1,
+  text: "El Código Civil español sigue, en su estructura, principalmente el modelo:",
+  options: [
+    "Romano-francés, articulado en torno a personas, bienes y acciones",
+    "Anglosajón, basado en precedentes judiciales",
+    "Germánico, con una amplia Parte General y libros sistemáticos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El Código Civil español reproduce el esquema clásico de personas, bienes y acciones propio de la tradición romano-francesa, aunque con peculiaridades. A este modelo añade un libro específico de obligaciones y contratos, dada su importancia práctica. De este modo, su estructura no coincide con la organización dogmática universitaria de raíz alemana."
+},
+
+{
+  tema: 1,
+  text: "El Derecho civil se encuadra tradicionalmente como:",
+  options: [
+    "Derecho público, por su función organizativa del poder estatal",
+    "Derecho privado, por regular relaciones entre particulares en plano de igualdad",
+    "Derecho penal, por su carácter sancionador"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo sitúa al Derecho civil dentro del Derecho privado porque se ocupa de relaciones entre sujetos situados en un plano de coordinación, sin poderes de supremacía. A diferencia del Derecho público, no organiza el poder ni la actividad de la Administración, sino la vida jurídica ordinaria de las personas en sus dimensiones personal, familiar y patrimonial."
+},
+
+{
+  tema: 1,
+  text: "En el ámbito del Derecho civil, el tipo de norma que predomina es:",
+  options: [
+    "La norma dispositiva, que permite a las partes modificar o excluir su aplicación",
+    "La norma imperativa, de ius cogens, que no admite pacto en contrario",
+    "La costumbre sin respaldo legal"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El texto destaca que en el Derecho civil predominan las normas dispositivas, que dejan margen a la autonomía privada. Las partes pueden separarse de la regulación legal si respetan ciertos límites (ley, orden público, buenas costumbres). En el Derecho público, en cambio, prevalecen las normas imperativas, que no pueden ser derogadas por acuerdo."
+},
+
+{
+  tema: 1,
+  text: "La distinción entre Derecho público y Derecho privado, según el capítulo:",
+  options: [
+    "Aparece como eje central en la Constitución española",
+    "No figura en la Constitución, pero tiene valor histórico, didáctico y organizativo",
+    "Ha sido eliminada del ordenamiento y carece de relevancia práctica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la Constitución no formula expresamente esta dicotomía, lo que revela que no es un criterio constitucional directo. Sin embargo, la distinción mantiene importancia histórica y pedagógica, y resulta útil para organizar ramas del Derecho y jurisdicciones. Su función es instrumental y práctica más que dogmática absoluta."
+},
+
+{
+  tema: 1,
+  text: "Una de las principales utilidades prácticas de la distinción entre Derecho público y privado es:",
+  options: [
+    "Determinar el valor de las fuentes del Derecho",
+    "Determinar la competencia de los distintos órdenes jurisdiccionales",
+    "Fijar la duración de los procesos judiciales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El texto explica que esta distinción ayuda a decidir qué orden jurisdiccional debe conocer de cada conflicto: civil, penal, contencioso-administrativo, social o militar. Aunque la Constitución no la consagre expresamente, sigue siendo un criterio organizativo esencial en la práctica forense y procesal."
+},
+
+{
+  tema: 1,
+  text: "Históricamente se ha considerado al Derecho civil como Derecho común porque:",
+  options: [
+    "Se aplica solo a los casos residuales de escasa importancia",
+    "Es el tronco general del que se han desgajado ramas especiales y cumple función supletoria",
+    "Es el único Derecho reconocido en la Constitución"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo recuerda que el civil fue el Derecho general de la comunidad, del que se independizaron poco a poco sectores como el mercantil o el laboral. A la vez, cumplía una función supletoria frente a ordenamientos particulares: cuando estos no ofrecían solución, se acudía al Derecho civil como Derecho común."
+},
+
+{
+  tema: 1,
+  text: "Tras la reforma del Título Preliminar de 1974, el artículo 4.3 del Código Civil establece que sus disposiciones:",
+  options: [
+    "Solo se aplican si la ley especial lo remite expresamente",
+    "Se aplican como supletorias en materias regidas por otras leyes",
+    "Quedan derogadas frente a cualquier ley especial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El nuevo artículo 4.3 CC dispone que las normas del Código se aplican como supletorias en materias reguladas por otras leyes. Esto refuerza la idea de que el Derecho civil conserva una función supletoria, pero ya no exclusiva del Código, sino extendida a un conjunto de normas civiles más amplio. Así se actualiza su papel de Derecho común."
+},
+
+{
+  tema: 1,
+  text: "Según la comprensión actual, el Derecho común lo constituye:",
+  options: [
+    "Exclusivamente el Código Civil de 1889",
+    "El conjunto del Derecho civil en sentido amplio: Código, leyes especiales y Derechos forales que regulan instituciones civiles",
+    "Solo las normas civiles estatales, excluyendo las de origen foral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo concluye que hoy el Derecho común ya no se identifica solo con el Código Civil. Pasa a entenderse como el conjunto de normas civiles, estén o no codificadas, incluidas las de origen foral cuando regulan instituciones civiles. Esta visión amplia refleja la complejidad del sistema y la coexistencia de fuentes estatales y autonómicas."
+},
+
+{
+  tema: 1,
+  text: "Concebir el Derecho civil como Derecho privado general implica que:",
+  options: [
+    "Se aplica solo de manera residual y excepcional",
+    "Sigue siendo la base sobre la que se construyen y completan las demás ramas del Derecho privado",
+    "Ha perdido toda función supletoria en el ordenamiento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El texto señala que el Derecho civil actúa como Derecho privado general porque proporciona las categorías básicas de persona, bienes, obligaciones y familia que usan otras ramas. Además, mantiene una función supletoria para rellenar lagunas de ordenamientos especiales. De este modo, continúa siendo el eje estructural del Derecho privado en España."
+},
+// 🟦 TEMA 2 – FORMACIÓN HISTÓRICA DEL DERECHO CIVIL ESPAÑOL
+
+{
+  tema: 2,
+  text: "¿Qué significó la recepción del Derecho romano en la península durante la Edad Media?",
+  options: [
+    "La sustitución total del Derecho consuetudinario",
+    "La incorporación progresiva del Derecho común como referencia técnica superior",
+    "La derogación inmediata de los fueros locales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La recepción del Derecho romano no eliminó de golpe los ordenamientos locales, pero sí introdujo un Derecho común más sistemático que sirvió de base doctrinal y jurisprudencial. La Universidad y la ciencia jurídica lo impulsaron como criterio subsidiario frente a lagunas o insuficiencias locales. Constituyó el fundamento técnico del Derecho civil moderno."
+},
+
+{
+  tema: 2,
+  text: "¿Qué caracterizó al Derecho civil castellano durante la Baja Edad Media?",
+  options: [
+    "Una completa unidad legislativa",
+    "La coexistencia de fueros locales, legislación regia y Derecho común",
+    "El predominio absoluto del Derecho romano sin aportaciones propias"
+  ],
+  correctIndex: 1,
+  explanation:
+    "En Castilla convivían ordenamientos municipales, decisiones reales contenidas en los Ordenamientos y Partidas, y un creciente uso del Derecho común. Esta pluralidad generaba dispersión, pero también permitía soluciones flexibles. Las Partidas adquirieron autoridad doctrinal y más tarde serían fundamento del proyecto codificador."
+},
+
+{
+  tema: 2,
+  text: "¿Por qué las Leyes de Toro (1505) tuvieron gran relevancia en la historia del Derecho civil?",
+  options: [
+    "Porque derogaron todo el Derecho anterior",
+    "Porque consolidaron las Partidas como Derecho supletorio y estabilizaron el sistema castellano",
+    "Porque introdujeron por primera vez el matrimonio civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las Leyes de Toro sistematizaron y jerarquizaron las fuentes vigentes en Castilla, otorgando a las Partidas un papel supletorio esencial. Lograron una notable estabilidad normativa y redujeron los conflictos entre fueros, legislación regia y doctrina. Constituyeron un antecedente decisivo del posterior proceso de codificación civil."
+},
+
+{
+  tema: 2,
+  text: "La etapa de los Derechos forales en la España moderna se caracterizó por:",
+  options: [
+    "La homogeneidad normativa entre territorios",
+    "La pervivencia de ordenamientos territoriales propios en convivencia con el Derecho castellano",
+    "La prohibición de aplicar normas locales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Numerosos territorios conservaron sistemas civiles propios —Navarra, Aragón, Cataluña, Baleares, País Vasco— que coexistieron con el Derecho castellano. Esta pluralidad, lejos de desaparecer, se mantuvo en la práctica judicial y registral. El pluralismo foral condicionó fuertemente la codificación decimonónica."
+},
+
+{
+  tema: 2,
+  text: "Tras la Constitución de Cádiz de 1812, la unidad legislativa civil se consideraba:",
+  options: [
+    "Una exigencia necesaria para consolidar el Estado liberal",
+    "Un proyecto secundario sin relevancia política",
+    "Una tarea innecesaria dada la fortaleza de los fueros"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El liberalismo veía la unidad legislativa como condición para garantizar igualdad ante la ley y eficacia del mercado nacional. La Constitución de Cádiz impulsó el ideal de un Derecho civil común aplicable a todo el territorio. Sin embargo, los fuertes particularismos forales retrasaron su realización efectiva."
+},
+
+{
+  tema: 2,
+  text: "¿Cuál fue la principal causa del fracaso del proyecto de Código Civil de 1851?",
+  options: [
+    "Su escasa calidad técnica",
+    "La resistencia política de los territorios con Derecho foral propio",
+    "La oposición de la Iglesia al libro de familia"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Aunque técnicamente notable, el proyecto de 1851 no superó la oposición de los territorios que defendían sus ordenamientos civiles tradicionales. Las disputas sobre la unificación completa o la conservación foral hicieron imposible un consenso. El texto quedó como referencia doctrinal, pero no llegó a promulgarse."
+},
+
+{
+  tema: 2,
+  text: "Tras el fracaso del proyecto de 1851, la estrategia legislativa consistió en:",
+  options: [
+    "Detener toda reforma hasta nuevo consenso",
+    "Aprobar leyes especiales en materias clave",
+    "Eliminar los registros públicos para simplificar el sistema"
+  ],
+  correctIndex: 1,
+  explanation:
+    "<b>Fundamento y explicación</b><br><br>" +
+    "Durante la segunda mitad del siglo XIX se aprobaron numerosas leyes especiales (Aguas, Matrimonio civil, Registro Civil, Hipotecaria…) que modernizaron sectores importantes del Derecho privado mientras se aplazaba la codificación completa. Estas leyes permitieron actualizar instituciones esenciales sin necesidad de un código unificado."
+},
+
+{
+  tema: 2,
+  text: "La Ley Hipotecaria de 1861 tuvo especial importancia porque:",
+  options: [
+    "Sustituyó el sistema registral por completo",
+    "Introdujo un régimen moderno de publicidad jurídica de bienes inmuebles",
+    "Estableció la propiedad comunal obligatoria"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Ley Hipotecaria creó un sistema registral moderno basado en la fe pública y en la seguridad del tráfico inmobiliario. Permitió identificar con claridad los derechos reales sobre los inmuebles y dotó de confianza a la propiedad privada. Constituyó un hito previo imprescindible para la futura codificación civil."
+},
+
+{
+  tema: 2,
+  text: "La Comisión General de Codificación desempeñó un papel decisivo porque:",
+  options: [
+    "Ejerció funciones judiciales en materia civil",
+    "Elaboró proyectos, informes y materiales técnicos que guiaron la formación del Código Civil",
+    "Actuó como Parlamento bicameral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Comisión reunió a juristas especializados encargados de redactar textos y estudiar el estado del Derecho civil. Sus trabajos fueron fundamentales para sintetizar la tradición castellana, los Derechos forales y la experiencia comparada. Es el órgano técnico clave del proceso codificador español."
+},
+
+{
+  tema: 2,
+  text: "¿Qué solución adoptó finalmente la Ley de Bases de 1888 para superar el conflicto entre unificación y foralismo?",
+  options: [
+    "Imponer un Código Civil único sin excepciones",
+    "Permitir la coexistencia de un Código Civil común y apéndices forales",
+    "Abolir todo Derecho civil foral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Ley de Bases optó por un modelo flexible: un Código Civil común para toda España complementado con apéndices específicos para cada territorio foral. Esta fórmula buscaba conciliar la unidad legislativa con el respeto a las peculiaridades históricas. Permitió que la codificación avanzara sin anular los Derechos territoriales."
+},
+
+{
+  tema: 2,
+  text: "El Código Civil de 1889 se concibe como:",
+  options: [
+    "Un texto totalmente original sin conexión con la tradición previa",
+    "Una síntesis de tradición castellana, Derecho común y soluciones forales",
+    "Una transcripción del Código Napoleónico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El Código Civil español no fue una copia literal de modelos extranjeros: integró elementos de las Partidas, del Derecho común y de diversas tradiciones forales. Su valor radica en su carácter de síntesis y adaptación al contexto español. Representa el equilibrio entre unidad legislativa y pluralidad histórica."
+},
+
+{
+  tema: 2,
+  text: "La coexistencia de Código Civil y Compilaciones forales tras 1889 implicó:",
+  options: [
+    "La derogación automática del Código Civil en los territorios forales",
+    "Un sistema dual en el que el Código actúa como supletorio",
+    "Una ruptura total de la unidad civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las Compilaciones forales recogían el Derecho propio de cada territorio y coexistían con el Código Civil, que se aplicaba supletoriamente en caso de lagunas. Este sistema dual mantuvo la diversidad civil sin perder un marco común, permitiendo un equilibrio entre unidad y pluralismo."
+},
+
+{
+  tema: 2,
+  text: "El proceso de reformas parciales del Código Civil en el siglo XX se explica por:",
+  options: [
+    "La imposibilidad de derogar el Código",
+    "La necesidad de adaptar instituciones concretas a nuevas realidades sociales",
+    "La sustitución completa por códigos autonómicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "A lo largo del siglo XX se reformaron instituciones como patria potestad, matrimonio, filiación o sucesiones para adecuarlas a cambios sociales, constitucionales y tecnológicos. Estas reformas parciales evitaron la necesidad de un nuevo código completo y permitieron renovar sectores concretos sin alterar toda la estructura."
+},
+
+{
+  tema: 2,
+  text: "Tras la Constitución de 1978, el Derecho civil foral o especial se caracteriza por:",
+  options: [
+    "Quedar eliminado por el principio de igualdad",
+    "Ser plenamente compatible con la unidad del Derecho civil estatal, dentro de las competencias autonómicas",
+    "Tener rango superior al Código Civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Constitución reconoce la existencia y desarrollo del Derecho civil foral en territorios con tradición propia. Este coexiste con el Código Civil estatal dentro de un marco de reparto competencial. El sistema resultante mantiene la unidad básica del Derecho civil español, pero admite diversificación territorial."
+},
+
+{
+  tema: 2,
+  text: "La competencia autonómica en materia civil, según la Constitución, se fundamenta en:",
+  options: [
+    "Una cesión voluntaria del Estado",
+    "El reconocimiento histórico de ordenamientos civiles propios",
+    "Un proceso de descentralización económico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 149.1.8ª CE permite a las comunidades con tradición civil propia conservar, modificar y desarrollar su Derecho civil. No es una concesión política circunstancial, sino un reconocimiento de realidades jurídicas históricas. Este modelo permite coexistencia entre legislación estatal y legislación civil autonómica."
+},
+
+{
+  tema: 2,
+  text: "Hoy el sistema civil español puede describirse como:",
+  options: [
+    "Uniforme y centralizado",
+    "Plural, compuesto por un Derecho civil común y varios Derechos civiles autonómicos",
+    "Inexistente en territorios forales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La estructura civil es plural: el Estado mantiene un Derecho civil común (Código Civil + leyes civiles estatales), mientras que algunas comunidades autónomas ejercen competencias en materias civiles propias. Este modelo combina unidad estructural con diversidad normativa, continuando la tradición histórica española."
+},
+
+{
+  tema: 2,
+  text: "En caso de conflicto entre Derecho civil estatal y Derecho civil autonómico en materia foral:",
+  options: [
+    "Prevalece siempre el Código Civil",
+    "Debe aplicarse la regla competencial del art. 149.1.8ª CE",
+    "Decide la comunidad autónoma afectada"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 149.1.8ª CE establece qué materias corresponden al Estado (bases de las obligaciones, ordenación de los registros civiles y mercantiles, reglas de conflicto…) y cuáles pueden desarrollar las comunidades forales. La prevalencia depende del reparto competencial, no de la antigüedad ni del carácter estatal o autonómico."
+},
+
+{
+  tema: 2,
+  text: "Uno de los criterios esenciales para identificar si una norma civil autonómica es válida es:",
+  options: [
+    "Que sea más moderna que la estatal",
+    "Que no invada las competencias exclusivas del Estado fijadas en la Constitución",
+    "Que esté inspirada en el Código Napoleónico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La STC ha reiterado que las comunidades con competencia civil pueden regular materias propias de su tradición, pero no pueden ocupar ámbitos reservados al Estado. La validez de la norma depende de su ajuste a los títulos competenciales. Esto garantiza equilibrio entre pluralidad civil y cohesión del ordenamiento."
+},
+
+{
+  tema: 2,
+  text: "El Derecho civil común sigue cumpliendo hoy una función:",
+  options: [
+    "Meramente histórica sin relevancia actual",
+    "Supletoria frente a lagunas de otros ordenamientos",
+    "Restrictiva respecto al Derecho autonómico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el Derecho civil común actúa como base conceptual y como Derecho supletorio cuando una materia no está regulada por normas especiales o autonómicas. Esta función evita vacíos normativos y refuerza la coherencia del sistema general. Se apoya en el art. 4.3 CC y en la tradición histórica del civil común."
+},
+
+{
+  tema: 2,
+  text: "El proceso histórico del Derecho civil español permite concluir que:",
+  options: [
+    "España ha pasado de un sistema centralista a otro invariablemente unitario",
+    "La tensión entre unidad y pluralidad civil ha sido constante desde la Edad Media",
+    "Solo después de 1978 apareció el pluralismo civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo muestra que la coexistencia de unidades normativas y ordenamientos territoriales es un rasgo histórico del Derecho civil español. Ni la codificación ni la Constitución han eliminado esta dualidad, sino que la han ordenado. La historia revela una convivencia estructural entre unidad y diversidad civil."
+},
+// 🟩 TEMA 3 – LA APLICACIÓN DEL DERECHO CIVIL
+
+{
+  tema: 3,
+  text: "Según el capítulo, la aplicación del Derecho comienza por:",
+  options: [
+    "La mera voluntad del juez",
+    "La identificación correcta de la norma aplicable al supuesto de hecho",
+    "La jurisprudencia del Tribunal Supremo"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la aplicación jurídica parte de la selección de la norma pertinente. El intérprete debe partir del supuesto de hecho y conectar ese caso real con la categoría normativa adecuada. Esta operación, previa a toda interpretación sistemática o teleológica, es esencial para garantizar seguridad jurídica."
+},
+
+{
+  tema: 3,
+  text: "El punto de partida de toda interpretación jurídica es:",
+  options: [
+    "Determinar la voluntad subjetiva del legislador histórico",
+    "El tenor literal de la norma, según el art. 3.1 CC",
+    "La opinión dominante en la doctrina"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El art. 3.1 CC establece que las normas se interpretarán según el sentido propio de sus palabras, en relación con el contexto. Aunque no es un criterio exclusivo, constituye el punto de partida obligado. A partir del tenor literal, se integran criterios sistemáticos, históricos y teleológicos para obtener un resultado coherente."
+},
+
+{
+  tema: 3,
+  text: "La interpretación sistemática implica:",
+  options: [
+    "Aislar la norma de su contexto",
+    "Integrarla en el conjunto del sistema jurídico y evaluar su coherencia interna",
+    "Preferir siempre la norma especial a la general"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el sentido de una norma se comprende mejor si se analiza su ubicación, su función dentro de la institución y su relación con otras disposiciones. La interpretación sistemática evita soluciones fragmentarias y garantiza la coherencia interna del ordenamiento. Es un método indispensable en el Derecho civil."
+},
+
+{
+  tema: 3,
+  text: "La interpretación teleológica busca:",
+  options: [
+    "La finalidad u objetivo perseguido por la norma",
+    "El significado etimológico de las palabras",
+    "Determinar la intención política del legislador"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El art. 3.1 CC ordena interpretar atendiendo a la realidad social del tiempo y a la finalidad de la norma. El enfoque teleológico permite adaptar el contenido normativo a su función social y evitar resultados injustos o absurdos. El capítulo destaca que este método es imprescindible en instituciones dinámicas como familia, propiedad o contratos."
+},
+
+{
+  tema: 3,
+  text: "El art. 3.1 CC añade como criterio interpretativo:",
+  options: [
+    "La autoridad del Tribunal Constitucional",
+    "La realidad social del tiempo en que las normas han de ser aplicadas",
+    "La intención personal del intérprete"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo subraya que el ordenamiento no puede aplicarse con rigidez ahistórica: debe adecuarse a la evolución social. La apelación a la realidad social permite flexibilizar y actualizar el alcance de las normas. Este criterio ha sido esencial en la evolución de instituciones como matrimonio, filiación o potestad parental."
+},
+
+{
+  tema: 3,
+  text: "La jurisprudencia del Tribunal Supremo, según el art. 1.6 CC:",
+  options: [
+    "Constituye fuente del Derecho equiparable a la ley",
+    "No crea normas, pero complementa el ordenamiento al interpretar y aplicar las existentes",
+    "Carece de valor para los jueces inferiores"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo destaca que la jurisprudencia no es fuente de Derecho en sentido estricto, pero sirve para unificar criterios interpretativos y dotar de seguridad jurídica al sistema. El art. 1.6 CC reconoce esta función complementaria, que orienta a los órganos judiciales y a los operadores jurídicos en general."
+},
+
+{
+  tema: 3,
+  text: "Los principios generales del Derecho cumplen la función de:",
+  options: [
+    "Actuar como normas supletorias en caso de laguna legal",
+    "Ser irrelevantes para la aplicación del Derecho",
+    "Sustituir automáticamente a las leyes especiales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El art. 1.4 CC atribuye a los principios generales un papel integrador: llenan las lagunas del ordenamiento cuando no existe ley ni costumbre aplicable. También sirven como criterio interpretativo para orientar el sentido de las normas y asegurar coherencia interna. Son, por tanto, pilares estructurales del sistema civil."
+},
+
+{
+  tema: 3,
+  text: "La analogía puede emplearse cuando:",
+  options: [
+    "Existe una laguna legal y un supuesto semejante regulado por la ley",
+    "La ley es clara y no deja dudas",
+    "Se pretende crear un nuevo derecho subjetivo"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La analogía opera cuando un caso no tiene regulación directa, pero existe un supuesto similar previsto por el ordenamiento. Permite extender la norma al caso no regulado atendiendo a su razón jurídica. El capítulo insiste en que la analogía no crea derecho nuevo, sino que aplica la lógica del sistema para resolver lagunas."
+},
+
+{
+  tema: 3,
+  text: "La analogía legis consiste en:",
+  options: [
+    "Construir soluciones basadas exclusivamente en la equidad",
+    "Aplicar a un caso no regulado la norma prevista para un caso semejante",
+    "Usar los principios generales para resolver lagunas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La analogía legis aplica analógicamente normas concretas cuyo supuesto de hecho es similar al del caso no previsto. Requiere semejanza relevante entre ambos supuestos y ausencia de prohibición legal. Según el capítulo, es el primer recurso interpretativo ante una laguna antes de acudir a la analogía iuris."
+},
+
+{
+  tema: 3,
+  text: "La analogía iuris se emplea cuando:",
+  options: [
+    "Existe norma similar aplicable",
+    "No existe norma semejante, pero puede derivarse una solución de los principios generales del Derecho",
+    "La ley prohíbe expresamente toda analogía"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La analogía iuris se basa en los principios rectores del ordenamiento cuando no existe norma concreta aplicable ni norma semejante. Es el último nivel de integración jurídica ante lagunas. El capítulo resalta que garantiza coherencia del sistema y continuidad de valores jurídicos fundamentales."
+},
+
+{
+  tema: 3,
+  text: "La equidad, según el capítulo, puede actuar como:",
+  options: [
+    "Una fuente autónoma de obligaciones",
+    "Un criterio corrector que evita soluciones manifiestamente injustas",
+    "Una facultad del legislador para modificar sentencias"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La equidad no sustituye la ley, pero permite ajustar la aplicación normativa a las circunstancias específicas de un caso concreto. El capítulo destaca que tiene función integradora y moderadora, evitando rigideces excesivas. Su uso debe ser prudente y complementario, no arbitrario ni contrario a la seguridad jurídica."
+},
+
+{
+  tema: 3,
+  text: "Según el art. 6 CC, la ignorancia de la ley:",
+  options: [
+    "Excusa su cumplimiento cuando sea razonable",
+    "No excusa de su cumplimiento",
+    "Es causa automática de nulidad de los actos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo recuerda que la ley obliga desde su publicación oficial en el BOE. La ignorancia no exime del deber de cumplirla porque ello comprometería la seguridad jurídica. La regla protege el interés colectivo y evita un uso oportunista de la falta de conocimiento."
+},
+
+{
+  tema: 3,
+  text: "El error de Derecho, según el art. 6.1 CC:",
+  options: [
+    "Siempre anula los actos jurídicos",
+    "No produce efectos, salvo cuando la ley prevea lo contrario",
+    "Equivale al dolo"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El error de Derecho no invalida los actos salvo que una norma lo prevea expresamente, como ocurre en ciertos supuestos de representación o en materia tributaria. El capítulo explica que el error normativo no puede convertirse en excusa general, pues pondría en riesgo la estabilidad y eficacia del sistema jurídico."
+},
+
+{
+  tema: 3,
+  text: "La exclusión voluntaria de la ley aplicable, según el art. 6.2 CC:",
+  options: [
+    "Es válida sin condiciones",
+    "No será admitida cuando contraríe el interés o el orden público o perjudique a terceros",
+    "Es siempre obligatoria para el juez"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo subraya que la autonomía privada tiene límites: las partes no pueden dejar sin efecto normas cuando ello afecte a terceros o al interés general. El art. 6.2 CC marca un equilibrio entre libertad de pacto y protección del orden público. El juez controla estos límites para evitar abusos."
+},
+
+{
+  tema: 3,
+  text: "La renuncia de derechos reconocidos por la ley es válida cuando:",
+  options: [
+    "No contraría el interés público ni perjudica a terceros",
+    "Es beneficiosa para el deudor",
+    "Se hace de forma verbal ante testigos"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo destaca que la renuncia solo puede recaer sobre derechos disponibles, no sobre derechos indisponibles o de carácter personalísimo. La validez se supedita a que no afecte a terceros ni vulnere el orden público. Esta regla garantiza un equilibrio entre libertad del titular y respeto a la estructura del sistema jurídico."
+},
+
+{
+  tema: 3,
+  text: "La interpretación auténtica es aquella que:",
+  options: [
+    "Realiza el legislador mediante leyes interpretativas",
+    "Efectúa el Tribunal Supremo en pleno",
+    "Resulta de la costumbre consolidada"
+  ],
+  correctIndex: 0,
+  explanation:
+    "Las leyes interpretativas, dictadas por el propio legislador, aclaran el sentido de normas preexistentes. Tienen efecto retroactivo cuando su contenido coincide con la voluntad original del legislador. El capítulo señala que esta técnica busca resolver disputas interpretativas mediante una solución legislativa explícita."
+},
+
+{
+  tema: 3,
+  text: "La interpretación doctrinal se caracteriza por:",
+  options: [
+    "Ser vinculante para los tribunales",
+    "Provenir de los autores y estudiosos del Derecho",
+    "Crear normas jurídicas obligatorias"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La doctrina no tiene valor normativo, pero influye en la evolución del Derecho al ofrecer análisis sistemáticos y propuestas interpretativas. El capítulo subraya que, aunque carece de fuerza vinculante, su prestigio intelectual incide en la jurisprudencia y en las reformas legislativas. Es una fuente indirecta de progreso jurídico."
+},
+
+{
+  tema: 3,
+  text: "En caso de discrepancia entre la interpretación literal y la teleológica:",
+  options: [
+    "Debe prevalecer siempre la literal",
+    "Debe optarse por el resultado más coherente con la finalidad de la norma",
+    "Debe escucharse a las partes para decidir"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo aclara que el sentido literal no puede llevar a soluciones contrarias a la finalidad de la norma. El criterio teleológico se convierte en decisivo cuando evita resultados injustos, irracionales o incompatibles con el sistema. La doctrina y la jurisprudencia han consolidado esta prevalencia en múltiples instituciones civiles."
+},
+
+{
+  tema: 3,
+  text: "La aplicación analógica está prohibida cuando:",
+  options: [
+    "La materia está expresamente regulada",
+    "Se trata de normas sancionadoras o restrictivas de derechos",
+    "La norma es dispositiva"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo recuerda que la analogía no puede emplearse para ampliar supuestos sancionadores o limitativos, pues ello vulneraría el principio de legalidad y la seguridad jurídica. La prohibición opera tanto en Derecho penal como en normas restrictivas del Derecho civil. Este límite protege la libertad jurídica del individuo."
+},
+
+{
+  tema: 3,
+  text: "La seguridad jurídica en la aplicación del Derecho exige:",
+  options: [
+    "Uniformidad interpretativa y previsibilidad en la actuación de jueces y tribunales",
+    "Variabilidad continua según la opinión del juez",
+    "Desaparecer cuando existen lagunas"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo concluye que la seguridad jurídica requiere coherencia, uniformidad y previsibilidad en la interpretación y aplicación de las normas. La jurisprudencia del Tribunal Supremo, los principios generales y la técnica de integración buscan asegurar que los ciudadanos puedan anticipar las consecuencias jurídicas de sus actos. Es un valor estructural del ordenamiento civil."
+},
+// 🟦 TEMA 4 – LA APLICACIÓN DE LAS NORMAS JURÍDICAS
+{
+  tema: 4,
+  text: "¿Cuál es la función esencial del aplicador del Derecho según el Capítulo 4?",
+  options: [
+    "Elegir la norma más beneficiosa para una de las partes",
+    "Seleccionar dentro del ordenamiento la norma adecuada al caso y aplicarla",
+    "Crear nuevas normas para suplir las insuficiencias legales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El aplicador del Derecho debe identificar, dentro del sistema jurídico, la norma pertinente para resolver el caso concreto. Esta función garantiza la seguridad jurídica y permite canalizar los conflictos sociales mediante reglas objetivas. No consiste en crear normas nuevas, sino en aplicar el ordenamiento existente con rigor y coherencia."
+},
+
+{
+  tema: 4,
+  text: "El principal problema práctico en la aplicación del Derecho se debe a:",
+  options: [
+    "La excesiva simplicidad del ordenamiento",
+    "La dificultad para identificar la norma aplicable y determinar su sentido",
+    "La ausencia total de instituciones jurídicas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la mayor dificultad real consiste en localizar la norma adecuada y concretar su significado en relación con el caso. La complejidad del ordenamiento y la ambigüedad del lenguaje jurídico hacen inevitable esta tarea interpretativa. Por ello, calificar, integrar e interpretar son operaciones esenciales para aplicar correctamente el Derecho."
+},
+
+{
+  tema: 4,
+  text: "Las instituciones jurídicas se definen como:",
+  options: [
+    "Normas aisladas sin conexión entre sí",
+    "Conjuntos coherentes de normas destinadas a regular situaciones sociales típicas",
+    "Reformas legales improvisadas ante problemas sociales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El texto explica que las instituciones agrupan normas relacionadas para atender realidades sociales recurrentes. Funcionan como categorías sistemáticas que ayudan al intérprete a encontrar rápidamente la regulación aplicable. Así, conectan los hechos sociales con la técnica jurídica, permitiendo una aplicación ordenada del sistema."
+},
+
+{
+  tema: 4,
+  text: "¿Qué es la calificación jurídica?",
+  options: [
+    "La selección arbitraria de la norma más conveniente",
+    "La adaptación de la norma a los intereses de las partes",
+    "La operación que determina en qué institución o categoría jurídica se integra un caso"
+  ],
+  correctIndex: 2,
+  explanation:
+    "La calificación consiste en ubicar el caso dentro de una determinada institución o concepto jurídico. Sin esta operación preliminar, el intérprete no puede saber qué normas son relevantes. Es el primer paso del proceso aplicador y condiciona toda la solución jurídica del conflicto."
+},
+
+{
+  tema: 4,
+  text: "Cuando no existe regulación expresa para un caso, debe acudirse a:",
+  options: [
+    "La analogía con la institución más semejante",
+    "La interpretación gramatical estricta",
+    "La aplicación automática del Derecho penal"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La analogía permite aplicar al caso no previsto la normativa de un supuesto semejante, siempre que exista identidad de razón. El artículo 4.1 del Código Civil respalda este mecanismo para integrar vacíos normativos. No implica crear Derecho, sino extender razonablemente el sentido de la ley existente."
+},
+
+{
+  tema: 4,
+  text: "El principio iura novit curia significa que:",
+  options: [
+    "El juez solo conoce el Derecho si la parte lo alega",
+    "El juez debe conocer y aplicar de oficio el Derecho vigente",
+    "El juez no puede aplicar normas no invocadas por las partes"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Este principio implica que los jueces están obligados a identificar y aplicar las normas pertinentes sin depender de las alegaciones de las partes. El artículo 1.7 CC refuerza este deber. No obstante, existen excepciones relevantes como la costumbre y el Derecho extranjero, que deben ser alegados y probados."
+},
+
+{
+  tema: 4,
+  text: "¿Qué exige el artículo 1.3 del Código Civil respecto a la costumbre?",
+  options: [
+    "Que sea aplicada de oficio por el juez",
+    "Que sea alegada y probada por la parte que la invoque",
+    "Que prevalezca siempre sobre la ley"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El Código Civil establece que la costumbre debe ser alegada y demostrada por quien pretenda su aplicación. Este régimen es coherente con la naturaleza fáctica de la costumbre, que no puede presumirse como el Derecho escrito. El juez puede colaborar en su averiguación, pero no está obligado a conocerla de oficio."
+},
+
+{
+  tema: 4,
+  text: "Según la jurisprudencia del Tribunal Supremo, si no se demuestra el contenido del Derecho extranjero:",
+  options: [
+    "Debe desestimarse la demanda automáticamente",
+    "Debe aplicarse supletoriamente el Derecho español",
+    "Debe archivarse el procedimiento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La STS 578/2021 aclara que, ante la falta de prueba del Derecho extranjero, el juez debe aplicar el Derecho español como solución supletoria. Este criterio evita dejar sin resolución a una de las partes y mantiene la exigencia de probar el contenido del Derecho foráneo conforme al art. 281.2 LEC."
+},
+
+{
+  tema: 4,
+  text: "Las lagunas de la ley se refieren a:",
+  options: [
+    "Ausencia absoluta de Derecho aplicable",
+    "Supuestos no previstos expresamente por la norma positiva",
+    "Contradicciones entre leyes de distintos territorios"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que las lagunas de la ley surgen cuando un supuesto de hecho no ha sido contemplado expresamente por las normas vigentes. No significan un vacío total del sistema, pues el ordenamiento proporciona mecanismos de integración como la costumbre, los principios generales y la analogía."
+},
+
+{
+  tema: 4,
+  text: "¿Qué postura adopta el sistema español respecto a las lagunas del Derecho?",
+  options: [
+    "Reconoce su existencia y las regula expresamente",
+    "Niega su existencia afirmando la plenitud del ordenamiento",
+    "Las considera irrelevantes para la labor judicial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El ordenamiento español se considera un sistema completo y cerrado, capaz de ofrecer siempre una respuesta normativa. Así lo afirma el preámbulo del Decreto 1836/1974. Aunque existan lagunas de la ley, el sistema contiene instrumentos suficientes para resolver cualquier caso."
+},
+
+{
+  tema: 4,
+  text: "La analogía legis consiste en:",
+  options: [
+    "Aplicar principios generales sin apoyo en normas concretas",
+    "Extender directamente la aplicación de una norma a un caso semejante",
+    "Modificar la literalidad de la norma para adaptarla al caso"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La analogía legis aplica a un caso no previsto la solución establecida en otra norma que regula un supuesto similar. Su fundamento es la identidad de razón entre ambos casos. Es un mecanismo estrictamente normativo, que prolonga el sentiro de la ley sin contradecirlo."
+},
+
+{
+  tema: 4,
+  text: "¿Qué limitación establece el artículo 4.2 CC a la analogía?",
+  options: [
+    "Se prohíbe en materia civil",
+    "No puede aplicarse en normas penales, excepcionales o temporales",
+    "Debe aplicarse siempre que exista laguna legal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 4.2 CC impide la aplicación analógica de normas penales, excepcionales y temporales, para proteger los principios de legalidad y seguridad jurídica. Extender estas normas generaría incertidumbre y podría afectar negativamente a los derechos de los ciudadanos."
+},
+
+{
+  tema: 4,
+  text: "La función complementadora de la jurisprudencia se recoge en:",
+  options: [
+    "El artículo 1.6 del Código Civil",
+    "El artículo 3.2 del Código Civil",
+    "El artículo 24 CE"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El artículo 1.6 CC dispone que la jurisprudencia complementa el ordenamiento jurídico. Esto no la convierte en fuente formal, pero sí le atribuye un valor normativo material que orienta la aplicación uniforme de la ley. La doctrina del Tribunal Supremo desempeña un papel central en esta función."
+},
+
+{
+  tema: 4,
+  text: "La equidad, según el artículo 3.2 CC:",
+  options: [
+    "Puede ser fundamento exclusivo de decisión siempre que el juez lo considere oportuno",
+    "Solo puede emplearse como criterio exclusivo cuando la ley lo autorice expresamente",
+    "Es una fuente general y autónoma del Derecho"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 3.2 CC limita el uso autónomo de la equidad, permitiendo su empleo exclusivo solo en casos previstos por la ley. Fuera de esas excepciones, la equidad actúa como criterio interpretativo que permite adaptar la aplicación de la norma a circunstancias particulares, evitando decisiones rígidas."
+},
+
+{
+  tema: 4,
+  text: "La interpretación literal implica:",
+  options: [
+    "Ajustar la norma a las necesidades sociales",
+    "Atender al sentido propio de sus palabras dentro del texto",
+    "Aplicar siempre la norma según su significado gramatical sin excepción"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La interpretación literal exige atender al significado propio de las palabras, pero no de forma aislada. El intérprete debe considerar el conjunto del precepto y evitar conclusiones absurdas. Por eso, la regla in claris non fit interpretatio se aplica con cautela en la práctica jurisprudencial."
+},
+
+{
+  tema: 4,
+  text: "¿Qué caracteriza la interpretación sistemática?",
+  options: [
+    "Busca el sentido literal de los términos legales",
+    "Analiza la norma en relación con el resto del ordenamiento",
+    "Se basa exclusivamente en la voluntad histórica del legislador"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La interpretación sistemática entiende que una norma solo cobra sentido dentro del sistema jurídico al que pertenece. Examina su relación con otras disposiciones para evitar contradicciones y mantener la coherencia del ordenamiento. Es fundamental en un sistema complejo como el actual."
+},
+
+{
+  tema: 4,
+  text: "La interpretación histórica atiende a:",
+  options: [
+    "Las consecuencias prácticas de la aplicación de la norma",
+    "Los antecedentes legislativos e históricos que explican su origen",
+    "El efecto social que produce la norma en la actualidad"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Este criterio analiza el contexto histórico y legislativo en que se creó la norma para comprender su sentido originario. Incluye borradores, exposiciones de motivos y debates parlamentarios, así como la tradición jurídica previa. Permite evitar interpretaciones que desnaturalicen la norma respecto a su evolución."
+},
+
+{
+  tema: 4,
+  text: "La interpretación sociológica se caracteriza por:",
+  options: [
+    "Su atención exclusiva a la literalidad del texto",
+    "Adaptar la aplicación de la norma a la realidad social del tiempo en que debe aplicarse",
+    "Sustituir siempre a la interpretación histórica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Este criterio obliga al intérprete a valorar si la norma sigue siendo adecuada para las circunstancias actuales. No autoriza alterar arbitrariamente el contenido legal, pero sí permite ajustar su aplicación a los cambios sociales. La jurisprudencia destaca que debe emplearse con prudencia y sin tergiversar el texto."
+},
+
+{
+  tema: 4,
+  text: "La interpretación teleológica consiste en:",
+  options: [
+    "Buscar la finalidad y espíritu de la norma",
+    "Aplicar la norma según su sentido literal estricto",
+    "Interpretar siempre a favor del ciudadano"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El criterio teleológico atiende a la ratio legis, es decir, la finalidad última que persigue la norma. Este elemento, destacado por el artículo 3.1 CC, permite resolver dudas interpretativas privilegiando el propósito del legislador. Evita resultados absurdos que contradigan el espíritu de la regulación."
+},
+
+{
+  tema: 4,
+  text: "La interpretación auténtica corresponde a:",
+  options: [
+    "Los tribunales superiores",
+    "El legislador, que aclara o define el sentido de las normas",
+    "Los estudios doctrinales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La interpretación auténtica es aquella realizada por el propio legislador mediante definiciones legales o reformas interpretativas. Queda incorporada al texto normativo y orienta de forma vinculante su aplicación. Se diferencia así de la interpretación judicial y doctrinal, que carecen de fuerza normativa directa."
+},
+
+{
+  tema: 4,
+  text: "La interpretación constitucionalizada implica que:",
+  options: [
+    "Toda interpretación debe someterse a los valores y principios de la Constitución",
+    "Los jueces no pueden emplear el criterio teleológico",
+    "La Constitución actúa como simple referencia histórica"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El artículo 5.1 LOPJ exige que jueces y tribunales interpreten las normas conforme a la Constitución, que es la norma suprema del sistema. Esto asegura que los valores constitucionales guíen toda aplicación del Derecho, reforzando la coherencia del ordenamiento y la protección de los derechos fundamentales."
+},
+// 🟪 TEMA 5 – LA EFICACIA DE LAS NORMAS JURÍDICAS
+
+{
+  tema: 5,
+  text: "Según el Capítulo 5, ¿qué expresa la vigencia de una norma jurídica?",
+  options: [
+    "Su aprobación formal por el legislador, aunque aún no se aplique",
+    "Su presencia activa y eficaz en el ordenamiento como regla aplicable",
+    "Su superioridad jerárquica sobre otras normas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La vigencia significa que la norma está en pleno efecto y forma parte real del ordenamiento, pudiendo aplicarse a los casos correspondientes. No basta su mera aprobación: requiere publicación y entrada en vigor. El capítulo subraya que la vigencia marca la vida operativa de la norma en la sociedad."
+},
+
+{
+  tema: 5,
+  text: "¿Qué función cumple la publicación en el proceso de vigencia normativa?",
+  options: [
+    "Proporcionar una copia interna para uso exclusivo de la Administración",
+    "Dar conocimiento oficial al público y habilitar su exigibilidad",
+    "Sustituir la necesidad de entrada en vigor"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que la publicación es una garantía constitucional para los ciudadanos, porque asegura el conocimiento oficial de la norma y su publicidad general. Sin publicación carece de eficacia. Es una condición indispensable para que la norma pueda ser exigida legítimamente."
+},
+
+{
+  tema: 5,
+  text: "¿Qué establece el artículo 2.1 del Código Civil respecto a la entrada en vigor?",
+  options: [
+    "Que toda ley entra en vigor automáticamente el día de su aprobación",
+    "Que entra en vigor a los veinte días de su publicación, salvo disposición en contrario",
+    "Que las leyes solo entran en vigor con desarrollo reglamentario"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 2.1 CC fija el sistema general: la vacatio legis de veinte días desde la publicación. Este plazo garantiza el conocimiento razonable de las normas antes de su aplicación. No obstante, la propia ley puede acortar o ampliar este plazo en función de sus necesidades."
+},
+
+{
+  tema: 5,
+  text: "La derogación de una norma implica:",
+  options: [
+    "La eliminación total o parcial de su vigencia por otra norma posterior",
+    "La suspensión temporal de su aplicación sin efectos permanentes",
+    "La nulidad originaria por defectos en su creación"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La derogación se produce cuando una norma posterior elimina la aplicación de una anterior, total o parcialmente. Es un fenómeno propio de la sucesión normativa y expresa el principio de temporalidad del Derecho. A diferencia de la nulidad, no afecta a la validez originaria de la norma derogada."
+},
+
+{
+  tema: 5,
+  text: "¿Qué diferencia a la derogación expresa de la tácita?",
+  options: [
+    "La expresa se produce cuando el legislador lo declara; la tácita cuando la nueva norma es incompatible con la anterior",
+    "La tácita solo existe en leyes penales",
+    "La expresa siempre elimina el Código Civil completo"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La derogación expresa aparece cuando la nueva norma identifica explícitamente los artículos o leyes que quedan sin efecto. La tácita opera cuando existe incompatibilidad entre la regulación previa y la nueva, aunque no se declare la derogación. Ambas responden al principio de jerarquía y temporalidad normativa."
+},
+
+{
+  tema: 5,
+  text: "El principio de irretroactividad del artículo 2.3 CC establece que:",
+  options: [
+    "Las leyes pueden aplicarse a hechos pasados si son más favorables",
+    "Las leyes no tendrán efecto retroactivo salvo disposición en contrario",
+    "Las leyes siempre se aplican retroactivamente por seguridad jurídica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Este principio sostiene que las normas deben aplicarse hacia el futuro, protegiendo la confianza legítima y evitando alterar situaciones jurídicas ya consolidadas. No obstante, el legislador puede autorizar la retroactividad, aunque debe hacerlo de forma expresa y justificada dada su especial trascendencia."
+},
+
+{
+  tema: 5,
+  text: "La retroactividad auténtica afecta a:",
+  options: [
+    "Hechos y situaciones jurídicas ya consumadas bajo la ley anterior",
+    "Situaciones en curso sin efectos producidos todavía",
+    "Normas procesales sin consecuencias materiales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La retroactividad auténtica ocurre cuando la nueva ley pretende incidir sobre hechos ya agotados o derechos definitivamente adquiridos. Es la forma más intensa de retroactividad y contraria al principio de seguridad jurídica, por lo que solo puede admitirse mediante clara voluntad del legislador."
+},
+
+{
+  tema: 5,
+  text: "La retroactividad impropia se refiere a:",
+  options: [
+    "La reapertura de procesos judiciales ya firmes",
+    "Situaciones jurídicas en curso cuyos efectos aún no se han agotado",
+    "Las leyes penales favorables"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La retroactividad impropia afecta a situaciones iniciadas bajo la ley anterior pero cuyos efectos aún no se han consolidado. La nueva norma regula los efectos futuros de esas relaciones. No supone una alteración de derechos adquiridos, por lo que es aceptada de forma general en el sistema español."
+},
+
+{
+  tema: 5,
+  text: "¿Qué son los derechos adquiridos según la doctrina clásica?",
+  options: [
+    "Expectativas futuras que aún no han generado efectos",
+    "Efectos ya incorporados de forma definitiva al patrimonio jurídico del titular",
+    "Situaciones en curso sin consolidación jurídica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos adquiridos son posiciones jurídicas ya consumadas e incorporadas plenamente al patrimonio del sujeto. No pueden verse afectadas por leyes posteriores sin vulnerar la seguridad jurídica. El capítulo destaca que esta categoría es clave para distinguir retroactividad auténtica e impropia."
+},
+
+{
+  tema: 5,
+  text: "El artículo 9.3 CE garantiza, entre otros principios:",
+  options: [
+    "La retroactividad plena de todas las leyes",
+    "La seguridad jurídica, la irretroactividad de normas sancionadoras no favorables y la interdicción de la arbitrariedad",
+    "La aplicación automática del Derecho extranjero"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El artículo 9.3 CE consagra la seguridad jurídica y limita la retroactividad en normas sancionadoras o restrictivas de derechos. También prohíbe la arbitrariedad de los poderes públicos. Estos principios actúan como límites constitucionales a la actividad legislativa y protegen la estabilidad del sistema."
+},
+
+{
+  tema: 5,
+  text: "La ultractividad normativa se refiere a:",
+  options: [
+    "La aplicación de una norma ya derogada a situaciones nacidas bajo su vigencia",
+    "La vigencia ilimitada de todas las normas",
+    "La reaplicación de leyes históricas por razones culturales"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La ultractividad implica que una norma derogada siga aplicándose a hechos producidos durante su vigencia. Este fenómeno se explica por la necesidad de mantener la coherencia del Derecho intertemporal. La ley nueva rige hacia el futuro, pero la anterior sigue gobernando situaciones ya generadas."
+},
+
+{
+  tema: 5,
+  text: "¿Qué principio rige la solución de conflictos entre leyes sucesivas?",
+  options: [
+    "La prevalencia de la norma más antigua",
+    "El criterio lex posterior derogat priori",
+    "La aplicación automática del Código Civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El principio lex posterior derogat priori establece que la ley posterior prevalece sobre la anterior cuando ambas son incompatibles. Refuerza el carácter dinámico del ordenamiento y garantiza que las normas vigentes reflejan las decisiones legislativas más recientes."
+},
+
+{
+  tema: 5,
+  text: "La irretroactividad es menos estricta respecto a:",
+  options: [
+    "Las leyes penales desfavorables",
+    "Las leyes procesales y de enjuiciamiento",
+    "Las leyes civiles que reconocen derechos adquiridos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las normas procesales suelen aplicarse a los procedimientos en curso porque regulan la actividad jurisdiccional y no afectan a derechos sustantivos. Su retroactividad es limitada, ya que no altera situaciones jurídicas consumadas. Esta flexibilidad se justifica por razones de orden público procesal."
+},
+
+{
+  tema: 5,
+  text: "Cuando una ley establece su propia retroactividad expresa, ello significa que:",
+  options: [
+    "Se aplica sólo al futuro",
+    "Puede aplicarse válidamente a hechos anteriores al amparo del principio de legalidad",
+    "Debe ser declarada inconstitucional"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El legislador puede autorizar la retroactividad mediante una cláusula expresa, siempre que respete los límites constitucionales. En ese caso, la ley puede aplicarse a hechos previos de manera válida. La constitucionalidad dependerá del alcance de la retroactividad y del respeto a los derechos fundamentales."
+},
+
+{
+  tema: 5,
+  text: "El principio de seguridad jurídica implica:",
+  options: [
+    "Que todas las leyes deben ser inmutables",
+    "La previsibilidad razonable del Derecho y la estabilidad de las situaciones jurídicas",
+    "La imposibilidad de derogar leyes"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La seguridad jurídica exige que los ciudadanos puedan prever las consecuencias legales de sus actos y confiar en la estabilidad normativa. Este principio limita la retroactividad intensa y orienta la interpretación del Derecho intertemporal. Está estrechamente ligado al artículo 9.3 CE."
+},
+
+{
+  tema: 5,
+  text: "La nulidad de una norma implica:",
+  options: [
+    "Que la norma fue válida pero dejó de aplicarse",
+    "Que la norma nunca debió formar parte del ordenamiento por vulnerar principios superiores",
+    "Que la norma queda suspendida temporalmente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La nulidad supone la expulsión radical de la norma, con efectos generalmente retroactivos, porque se considera incompatible con la Constitución o con principios básicos del sistema. Es distinta de la derogación, que elimina la vigencia pero no cuestiona la validez originaria."
+},
+
+{
+  tema: 5,
+  text: "Las normas temporales se caracterizan por:",
+  options: [
+    "Su vigencia indefinida",
+    "Estar destinadas a regir sólo durante un periodo o situación concreta",
+    "Su prohibición de ser derogadas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las normas temporales tienen una duración limitada, vinculada a situaciones excepcionales o transitorias. Expiran automáticamente al cumplirse el plazo o condiciones previstas. El artículo 4.2 CC excluye su aplicación analógica precisamente para evitar extender consecuencias propias de situaciones extraordinarias."
+},
+
+{
+  tema: 5,
+  text: "Las disposiciones transitorias de una ley sirven para:",
+  options: [
+    "Regular exclusivamente los aspectos formales del texto",
+    "Ordenar la transición entre la legislación anterior y la nueva",
+    "Establecer la derogación total del Código Civil"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las disposiciones transitorias resuelven conflictos de Derecho intertemporal, determinando qué ley rige situaciones en curso o históricas. Permiten una transición ordenada entre regímenes jurídicos, asegurando la coherencia del sistema y evitando inseguridad en la aplicación inmediata de la norma."
+},
+
+{
+  tema: 5,
+  text: "La retroactividad mínima se refiere a:",
+  options: [
+    "Leyes que afectan a situaciones en curso sin alterar derechos consolidados",
+    "El grado máximo de retroactividad permitido por la Constitución",
+    "La aplicación de leyes penales desfavorables"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La retroactividad mínima aparece cuando la norma incide levemente en situaciones nacidas bajo la ley anterior sin afectar derechos plenamente adquiridos. Se acepta por el ordenamiento porque no vulnera la seguridad jurídica. Es una forma limitada y moderada de retroactividad."
+},
+
+{
+  tema: 5,
+  text: "El criterio general para resolver conflictos de Derecho intertemporal es:",
+  options: [
+    "La anulación automática de la ley anterior",
+    "La aplicación de la ley vigente en el momento en que se producen los efectos jurídicos",
+    "La prevalencia de la ley posterior en todo caso"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que, en caso de duda, debe aplicarse la ley que rige en el momento en que se producen los efectos del acto o situación jurídica. Este criterio permite armonizar temporalidad y seguridad jurídica, evitando aplicar retroactivamente la ley nueva sin justificación expresa."
+},
+// 🟫 TEMA 6 – LOS DERECHOS SUBJETIVOS
+
+{
+  tema: 6,
+  text: "¿Qué expresa la idea fundamental de relación jurídica en el Derecho civil?",
+  options: [
+    "Una obligación puramente moral entre personas",
+    "Un vínculo entre sujetos que adquiere relevancia normativa y produce efectos jurídicos",
+    "Una relación social sin incidencia en el ordenamiento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La relación jurídica es un vínculo entre personas que el Derecho reconoce y regula, convirtiendo un hecho social en una situación jurídicamente relevante. Es el modo en que el ordenamiento organiza la convivencia mediante derechos y deberes. Savigny y la doctrina moderna coinciden en su naturaleza normativa."
+},
+
+{
+  tema: 6,
+  text: "¿Cuál es la estructura básica de toda relación jurídica?",
+  options: [
+    "Hechos, consecuencias y sanciones",
+    "Sujetos, objeto y contenido",
+    "Finalidad, procedimiento y prueba"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Toda relación jurídica exige sujetos (activos y pasivos), un objeto sobre el que recae y un contenido formado por derechos y deberes. Esta estructura permite identificar el ámbito de poder del titular y el correlativo deber del obligado. Su análisis es esencial para calificar y aplicar correctamente el Derecho."
+},
+
+{
+  tema: 6,
+  text: "Las relaciones jurídico-reales se caracterizan por:",
+  options: [
+    "Vincular únicamente a dos personas determinadas",
+    "Conceder poder directo e inmediato sobre un bien con eficacia frente a todos",
+    "Fundarse exclusivamente en contratos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos reales otorgan al titular un poder directo sobre una cosa y son oponibles erga omnes. Esto los diferencia de las relaciones obligatorias, donde la eficacia se limita a sujetos concretos. La posesión, la propiedad y los derechos limitados son ejemplos paradigmáticos de relaciones jurídico-reales."
+},
+
+{
+  tema: 6,
+  text: "¿Qué caracteriza al derecho subjetivo según la doctrina civilista?",
+  options: [
+    "Un deseo personal sin protección jurídica",
+    "Un poder jurídico atribuido a una persona para satisfacer un interés legítimo",
+    "Una facultad puramente moral sin proyección externa"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El derecho subjetivo es un poder reconocido por el ordenamiento para la satisfacción de intereses legítimos del titular. Supone la existencia de un sujeto activo, uno pasivo y un objeto protegido. Además, activa mecanismos de tutela como acciones, medidas cautelares y ejecución forzosa."
+},
+
+{
+  tema: 6,
+  text: "Las facultades dentro del derecho subjetivo son:",
+  options: [
+    "Derechos autónomos que siempre existen por separado",
+    "Potestades públicas ejercidas en interés general",
+    "Poderes parciales derivados del derecho, que lo hacen operable"
+  ],
+  correctIndex: 2,
+  explanation:
+    "Las facultades son posibilidades concretas de actuación integradas dentro del derecho subjetivo, como usar, disfrutar, disponer o resolver. Aunque normalmente siguen la suerte del derecho, en ocasiones pueden separarse (ej.: usufructo surgido de la facultad de uso). Cumplen la función de dotar de eficacia práctica al derecho."
+},
+
+{
+  tema: 6,
+  text: "Las potestades se distinguen de los derechos subjetivos porque:",
+  options: [
+    "Se ejercen siempre en beneficio exclusivo del titular",
+    "Están orientadas a intereses ajenos o generales",
+    "Carecen de límites y controles"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La esencia de la potestad es su carácter funcional: se ejerce en interés de terceros o del conjunto social. Así ocurre con la patria potestad, el cargo de tutor o las potestades administrativas. Su ejercicio está vinculado a límites teleológicos, deberes fiduciarios y un régimen reforzado de responsabilidad."
+},
+
+{
+  tema: 6,
+  text: "Los derechos patrimoniales se caracterizan porque:",
+  options: [
+    "Están ligados a la personalidad y son intransmisibles",
+    "Tienen contenido económico y son normalmente transmisibles",
+    "No pueden ser objeto de embargo ni valoración económica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos patrimoniales tienen contenido económico, forman parte del patrimonio del titular y son transmisibles y embargables. Incluyen derechos reales, de crédito y posiciones económicas protegidas. Se diferencian de los extrapatrimoniales, ligados a la personalidad y sin valoración dineraria."
+},
+
+{
+  tema: 6,
+  text: "Los derechos absolutos o generales se caracterizan por:",
+  options: [
+    "Obligar solo a un sujeto pasivo determinado",
+    "Tener eficacia frente a todos (erga omnes)",
+    "No admitir límites externos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos generales despliegan eficacia erga omnes: todos están obligados a respetarlos. Ejemplos típicos son la propiedad o los derechos de la personalidad. No son ilimitados, pues se someten a límites legales, al abuso de derecho y a la función social, garantizando la convivencia con los demás derechos."
+},
+
+{
+  tema: 6,
+  text: "Los derechos relativos se caracterizan por:",
+  options: [
+    "Ser exigibles frente a cualquier persona",
+    "Vincular únicamente a sujetos determinados en una relación concreta",
+    "No poder derivar de contratos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El deber de respeto en los derechos relativos recae solo sobre sujetos concretos vinculados por un contrato o relación jurídica previa. Así ocurre con la compraventa, el arrendamiento o los préstamos. Su eficacia queda restringida al marco de esa relación obligatoria."
+},
+
+{
+  tema: 6,
+  text: "Los derechos accesorios dependen de:",
+  options: [
+    "La voluntad del juez",
+    "La existencia y subsistencia de un derecho principal",
+    "La inscripción registral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos accesorios refuerzan la eficacia de un derecho principal, del cual dependen funcional y jurídicamente. Hipotecas, prendas y fianzas solo existen para garantizar una obligación principal. Si esta se extingue, el accesorio sigue su misma suerte conforme al principio accessorium sequitur principale."
+},
+
+{
+  tema: 6,
+  text: "La adquisición originaria de un derecho se produce cuando:",
+  options: [
+    "El derecho proviene de un titular anterior",
+    "El derecho surge ex novo sin transmisión previa",
+    "Se hereda un conjunto patrimonial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La adquisición originaria no deriva de un titular previo, sino que crea un derecho nuevo en cabeza del adquirente. Ejemplos clásicos son la ocupación de bienes sin dueño o la creación de obras intelectuales. La doctrina la distingue nítidamente de la adquisición derivativa, que implica sucesión en un derecho existente."
+},
+
+{
+  tema: 6,
+  text: "La adquisición derivativa traslativa implica:",
+  options: [
+    "La creación de un derecho totalmente nuevo",
+    "La transmisión del derecho existente con todo su contenido al nuevo titular",
+    "La extinción automática del derecho"
+  ],
+  correctIndex: 1,
+  explanation:
+    "En la adquisición derivativa traslativa, el derecho pasa íntegro de un titular a otro sin alteración de contenido. Un ejemplo es la compraventa de una finca o la cesión de un crédito. La identidad funcional del derecho se mantiene, cambiando únicamente el sujeto que lo ostenta."
+},
+
+{
+  tema: 6,
+  text: "La sucesión mortis causa se caracteriza por:",
+  options: [
+    "Transmitir derechos entre vivos mediante contrato",
+    "Originarse por el fallecimiento del titular conforme a ley o testamento",
+    "Excluir siempre las deudas del causante"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La sucesión mortis causa se abre con el fallecimiento del titular y opera según la ley o el testamento. El heredero continúa en la posición jurídica del causante, asumiendo derechos y obligaciones. El capítulo destaca su carácter universal cuando comprende la totalidad del patrimonio."
+},
+
+{
+  tema: 6,
+  text: "La sucesión universal implica que:",
+  options: [
+    "Solo se transmite un derecho concreto",
+    "Se transmite un conjunto global de derechos y obligaciones",
+    "Se extingue el patrimonio del causante"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La sucesión universal transmite un patrimonio completo, no derechos aislados, incorporando al sucesor a una pluralidad de posiciones jurídicas, incluidas cargas y obligaciones. Es característica de la herencia y constituye la diferencia esencial con la sucesión a título particular."
+},
+
+{
+  tema: 6,
+  text: "La subrogación real opera cuando:",
+  options: [
+    "El titular adquiere un nuevo derecho sin relación con el anterior",
+    "El objeto del derecho cambia, pero el derecho mantiene su identidad y eficacia",
+    "Se extinguen los derechos de terceros"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La subrogación real implica que el objeto cambia (por destrucción, expropiación o transformación), pero el derecho se proyecta sobre el nuevo objeto. Un ejemplo típico es la indemnización que sustituye a un inmueble hipotecado, manteniendo la garantía a favor del acreedor para proteger a terceros."
+},
+
+{
+  tema: 6,
+  text: "La mutación objetiva supone:",
+  options: [
+    "Un simple cambio cuantitativo del objeto",
+    "Un cambio profundo que sustituye el objeto por otro de distinta naturaleza",
+    "La extinción del derecho principal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La mutación objetiva ocurre cuando el objeto original desaparece y es sustituido por otro distinto, como un bien expropiado sustituido por indemnización. Aunque cambia la naturaleza del objeto, el derecho persiste funcionamente, manteniendo la continuidad jurídica del titular."
+},
+
+{
+  tema: 6,
+  text: "La extinción de un derecho subjetivo implica:",
+  options: [
+    "El cese definitivo de su eficacia para el titular",
+    "Una suspensión temporal sin efectos",
+    "La renuncia automática del titular"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La extinción marca el final definitivo de la eficacia del derecho. Puede producirse por cumplimiento, renuncia, prescripción, consolidación o pérdida del objeto. El capítulo destaca que cada institución prevé sus propias causas de cierre, pero todas responden al agotamiento de la función del derecho."
+},
+
+{
+  tema: 6,
+  text: "La renuncia de derechos, según el Código Civil:",
+  options: [
+    "Es siempre válida y libre",
+    "Está permitida salvo que contraríe la ley, el orden público o perjudique a terceros",
+    "Solo puede hacerse ante notario"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La renuncia es válida para derechos disponibles, pero encuentra límites estrictos en el artículo 6.2 CC: no puede perjudicar a terceros ni vulnerar el orden público. No procede respecto de derechos personalísimos o potestades en interés ajeno. Puede ser expresa o tácita siempre que respete la buena fe."
+},
+
+{
+  tema: 6,
+  text: "La prescripción extintiva produce:",
+  options: [
+    "La desaparición automática del derecho",
+    "La pérdida de posibilidad de exigirlo judicialmente tras inactividad prolongada",
+    "La extinción de los derechos personalísimos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La prescripción no elimina el derecho material, sino la posibilidad de ejercitarlo judicialmente tras el transcurso de los plazos legales. Exige inactividad del titular y opera para proteger la seguridad jurídica y la estabilidad de las relaciones. Su régimen se recoge en los arts. 1961 y ss. del Código Civil."
+},
+
+{
+  tema: 6,
+  text: "La usucapión puede dar lugar a:",
+  options: [
+    "La creación de un nuevo derecho que desplaza al antiguo titular",
+    "La desaparición automática de todos los derechos reales",
+    "Un derecho personal intransmisible"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La usucapión genera un derecho real en favor del poseedor cuando concurren posesión, tiempo y buena fe en los casos legalmente previstos. Este nuevo derecho desplaza al titular anterior, que pierde su poder jurídico. Su importancia práctica es enorme como modo de adquisición preferente."
+},
+// 🟫 TEMA 7 – EL EJERCICIO DE LOS DERECHOS
+
+{
+  tema: 7,
+  text: "¿Qué caracteriza el ejercicio de un derecho subjetivo según el Capítulo 7?",
+  options: [
+    "Es obligatorio para su titular",
+    "Es facultativo y el titular decide cuándo y cómo ejercitarlo",
+    "Requiere autorización judicial para cada actuación"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El ejercicio del derecho no es obligatorio: el titular elige si lo usa o no. El capítulo señala que este ejercicio responde a la satisfacción de intereses legítimos, que justifican la existencia del derecho. Además, subraya que la inactividad prolongada puede activar límites temporales como la prescripción o la caducidad."
+},
+
+{
+  tema: 7,
+  text: "El ejercicio de derechos por medio de representante implica que:",
+  options: [
+    "El titular pierde sus facultades jurídicas",
+    "El derecho se ejerce a través de la voluntad del representante dentro de sus poderes",
+    "El representante adquiere el derecho como propio"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El ejercicio indirecto permite que una persona actúe mediante representante legal o voluntario, manteniendo la titularidad intacta. El capítulo aclara que este mecanismo garantiza la protección de quienes carecen de capacidad o desean delegar la gestión. No se transfiere la titularidad, solo la facultad de ejercicio."
+},
+
+{
+  tema: 7,
+  text: "Según el capítulo, los derechos no pueden ejercerse de forma arbitraria porque:",
+  options: [
+    "Son poderes ilimitados otorgados por el Derecho",
+    "Su ejercicio debe ajustarse a la finalidad del derecho y al respeto de terceros",
+    "Toda actuación requiere autorización administrativa previa"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El ejercicio del derecho está condicionado por su función social y por las exigencias de convivencia. El capítulo subraya que incluso los derechos más amplios deben ejercitarse conforme a la buena fe y sin causar perjuicios injustificados. Esto evita extralimitaciones y garantiza el equilibrio entre libertades."
+},
+
+{
+  tema: 7,
+  text: "Los límites extrínsecos del ejercicio de derechos surgen cuando:",
+  options: [
+    "El derecho se agota por el paso del tiempo",
+    "El derecho de un titular colisiona con el de otro",
+    "El titular decide renunciar al derecho"
+  ],
+  correctIndex: 2,
+  explanation:
+    "Los límites extrínsecos aparecen cuando dos derechos convergen en el mismo ámbito y su ejercicio simultáneo resulta incompatible. El capítulo menciona ejemplos como servidumbres o propiedad horizontal, donde deben coordinarse intereses. La finalidad es evitar conflictos y asegurar un equilibrio funcional."
+},
+
+{
+  tema: 7,
+  text: "La colisión de derechos exige:",
+  options: [
+    "Ignorar uno de los derechos en conflicto",
+    "Aplicar reglas de jerarquía y ponderación entre los derechos afectados",
+    "Resolver siempre a favor del derecho más reciente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que la colisión requiere ponderación para armonizar los derechos concurrentes. La solución puede basarse en criterios constitucionales, interés general, prioridad temporal o rango. La jurisprudencia aplica esta técnica para evitar que un derecho anule injustificadamente a otro."
+},
+
+{
+  tema: 7,
+  text: "Las situaciones de cotitularidad se producen cuando:",
+  options: [
+    "Varios titulares comparten un mismo derecho sobre un bien",
+    "Dos derechos incompatibles se superponen sobre un bien",
+    "El titular pierde temporalmente el control del derecho"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La cotitularidad implica que dos o más personas son titulares de un mismo derecho, como ocurre en la comunidad de bienes. El ejercicio individual se limita por la coexistencia de facultades idénticas en otros cotitulares. El Código Civil establece reglas de uso, administración y disposición para evitar conflictos."
+},
+
+{
+  tema: 7,
+  text: "Los límites intrínsecos se caracterizan porque:",
+  options: [
+    "Se basan en la concurrencia de varios titulares",
+    "Derivan de la propia función social del derecho",
+    "Afectan solo a los derechos reales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los límites intrínsecos nacen de la estructura y finalidad del derecho mismo. El capítulo destaca como límites esenciales la buena fe y la prohibición del abuso, que impiden ejercicios antisociales o contrarios a la finalidad del derecho. Su papel es garantizar que el derecho se use conforme a su sentido legítimo."
+},
+
+{
+  tema: 7,
+  text: "Según el art. 7.1 CC, la buena fe en el ejercicio de derechos implica:",
+  options: [
+    "Actuar siempre en beneficio de terceros",
+    "Observar un estándar de lealtad, corrección y coherencia",
+    "Negar la posibilidad de cambiar de conducta"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La buena fe exige actuar con honestidad y coherencia, prohibiendo comportamientos contradictorios o maliciosos. Es un concepto jurídico indeterminado cuya concreción corresponde a los tribunales. Su función es evitar usos desleales del derecho, manteniendo la confianza y seguridad en el tráfico jurídico."
+},
+
+{
+  tema: 7,
+  text: "La buena fe objetiva actúa como:",
+  options: [
+    "Una regla moral sin valor jurídico",
+    "Un criterio jurídico para integrar y corregir relaciones jurídicas",
+    "Un límite exclusivo del Derecho penal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La buena fe objetiva permite completar, interpretar y corregir comportamientos conforme a exigencias de lealtad y confianza legítima. Según el capítulo, opera como una “válvula de adaptación” que evita soluciones injustas o formalistas. Su eficacia práctica deriva de la jurisprudencia del Tribunal Supremo."
+},
+
+{
+  tema: 7,
+  text: "La doctrina de los propios actos se basa en:",
+  options: [
+    "La posibilidad de actuar contradictoriamente cuando convenga",
+    "La prohibición de adoptar conductas incompatibles con actos previos generadores de confianza",
+    "La obligación de mantener siempre la misma voluntad"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Esta doctrina impide que alguien actúe en contradicción con su conducta anterior cuando haya generado confianza legítima en otro. Es una concreción de la buena fe y ha sido perfilada por la jurisprudencia. Garantiza coherencia y tutela la confianza en el tráfico jurídico, evitando comportamientos oportunistas."
+},
+
+{
+  tema: 7,
+  text: "Para aplicar la doctrina de los propios actos se exige:",
+  options: [
+    "Una simple variación de opinión",
+    "Contradicción clara entre la conducta previa y la posterior",
+    "Actuación siempre dolosa"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que deben concurrir dos elementos: un comportamiento previo inequívoco con relevancia jurídica y una conducta posterior incompatible. No se exige dolo, pero sí una expectativa razonable generada en el tercero. Su función es impedir ejercicios incoherentes que lesionen la buena fe."
+},
+
+{
+  tema: 7,
+  text: "El abuso del derecho según el art. 7.2 CC se produce cuando:",
+  options: [
+    "Se ejerce un derecho formalmente válido pero con finalidad antisocial o perjudicial",
+    "Se actúa sin intención de dañar",
+    "Se ejerce cualquier derecho de forma intensa"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El abuso del derecho sanciona ejercicios antisociales que superan los límites funcionales del derecho, causando un perjuicio injustificado. La clave no está en la titularidad, sino en el modo de uso. El capítulo insiste en que puede apreciarse tanto por exceso objetivo como por intención lesiva."
+},
+
+{
+  tema: 7,
+  text: "Para que exista abuso del derecho es necesario:",
+  options: [
+    "Daño cierto y ejercicio que exceda los límites normales del derecho",
+    "Siempre mala fe subjetiva",
+    "Que el acto sea contrario a una ley expresa"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La jurisprudencia exige un ejercicio excesivo o anormal del derecho y un perjuicio relevante para tercero. No siempre se exige intención de dañar: basta la anormalidad objetiva del uso. El capítulo resalta que el abuso opera como mecanismo corrector para evitar usos socialmente disfuncionales."
+},
+
+{
+  tema: 7,
+  text: "El abuso del derecho puede generar:",
+  options: [
+    "Solo la nulidad de la actuación",
+    "Indemnización de daños y medidas de cesación",
+    "Efectos exclusivamente morales sin consecuencias jurídicas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El art. 7.2 CC prevé tanto la responsabilidad indemnizatoria como la imposición de medidas destinadas a poner fin al abuso. Estas incluyen correcciones, límites o incluso prohibiciones de continuidad. La finalidad es restablecer el equilibrio sin vaciar totalmente el contenido del derecho."
+},
+
+{
+  tema: 7,
+  text: "La jurisprudencia clásica sobre abuso del derecho consolidó:",
+  options: [
+    "La idea de que el derecho puede ejercerse libremente sin límites",
+    "Un sistema de control basado en criterios sociales, teleológicos y morales",
+    "La derogación del principio qui iure suo utitur neminem laedit"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las sentencias del TS desde 1944 perfilan que el ejercicio del derecho está condicionado por su función social y por el respeto a la convivencia. La doctrina insiste en la necesidad de analizar el exceso, daño y finalidad del acto. Es un mecanismo flexible y casuístico para evitar usos antisociales."
+},
+
+{
+  tema: 7,
+  text: "El abuso del derecho opera con carácter:",
+  options: [
+    "General y preferente",
+    "Residual cuando no exista norma específica aplicable",
+    "Automático ante cualquier conflicto"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el abuso no sustituye a las normas específicas de cada institución. Solo opera en ausencia de regulación concreta y debe aplicarse con prudencia. Por ello, la jurisprudencia rechaza su uso como cláusula universal y exige acreditación rigurosa de sus elementos."
+},
+
+{
+  tema: 7,
+  text: "La autotutela se admite:",
+  options: [
+    "Como regla general del sistema",
+    "Solo en casos excepcionales previstos por la ley",
+    "Cuando el titular lo considere conveniente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El sistema actual restringe la autotutela para evitar abusos y preservar la paz jurídica. Solo se permite en supuestos muy concretos como cortar raíces invasoras o perseguir enjambres. El capítulo también menciona su versión moderna ligada a la discapacidad, basada en planificación notarial y registral."
+},
+
+{
+  tema: 7,
+  text: "La tutela judicial efectiva garantiza:",
+  options: [
+    "El derecho a obtener siempre una sentencia favorable",
+    "Acceso a los tribunales, resolución motivada y prohibición de indefensión",
+    "La paralización de todos los procesos civiles"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La tutela judicial efectiva implica acceso al juez, decisión motivada, garantías procesales y ejecución del fallo. El capítulo destaca que las formas procesales deben servir a la justicia material, evitando formalismos excesivos. Además, incluye medidas cautelares para asegurar la eficacia de la sentencia futura."
+},
+
+{
+  tema: 7,
+  text: "El arbitraje se caracteriza por:",
+  options: [
+    "Sustituir totalmente a la justicia estatal",
+    "Ser un mecanismo voluntario y especializado de resolución de controversias",
+    "Carecer de valor ejecutivo"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El arbitraje permite que las partes encomienden su conflicto a árbitros imparciales mediante convenio. Su procedimiento es flexible y el laudo tiene fuerza de cosa juzgada y valor ejecutivo. No sustituye al juez en materias indisponibles y cuenta con control judicial limitado, como la anulación por vicios graves."
+},
+
+{
+  tema: 7,
+  text: "La mediación familiar tiene como finalidad:",
+  options: [
+    "Imponer soluciones obligatorias a las partes",
+    "Facilitar acuerdos construidos por los propios interesados mediante diálogo asistido",
+    "Sustituir las decisiones judiciales en cualquier materia"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La mediación familiar es un proceso voluntario y confidencial donde un mediador ayuda a las partes a alcanzar acuerdos estables. Es útil en rupturas, relaciones parentales y conflictos intergeneracionales. No procede en violencia de género y respeta siempre el control judicial en materias indisponibles."
+},
+
+{
+  tema: 7,
+  text: "La mediación civil y mercantil según la Ley 5/2012 se caracteriza por:",
+  options: [
+    "Ser obligatoria antes de acudir al juez",
+    "Ser un mecanismo voluntario, confidencial y estructurado para conflictos disponibles",
+    "No tener efectos jurídicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo describe que la mediación civil y mercantil requiere acuerdo inicial, se desarrolla mediante un procedimiento flexible y culmina en un acuerdo con valor contractual. Puede elevarse a escritura pública para adquirir fuerza ejecutiva. Es una vía complementaria que agiliza conflictos y preserva relaciones."
+},
+// 🟧 TEMA 8 – LA PRESCRIPCIÓN Y LA CADUCIDAD
+
+{
+  tema: 8,
+  text: "¿Cuál es la función esencial de la prescripción extintiva en el sistema civil español?",
+  options: [
+    "Sancionar al deudor por incumplimiento",
+    "Sancionar la inactividad del titular durante un tiempo legal fijado",
+    "Eliminar la obligación desde su origen"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La prescripción extintiva funciona como una sanción a la inactividad prolongada del titular, que permite que el deudor se libere si el derecho no se ejercita dentro de los plazos legales. No extingue el derecho material de forma automática, sino la posibilidad de exigirlo judicialmente. Su fundamento es la seguridad jurídica."
+},
+
+{
+  tema: 8,
+  text: "¿Qué efecto produce la prescripción según el art. 1930 CC?",
+  options: [
+    "Extingue completamente el derecho material",
+    "Impide su ejercicio judicial, pero no la existencia del derecho",
+    "Transforma la obligación en natural automáticamente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El Código Civil establece que la prescripción afecta al ejercicio del derecho, no necesariamente a su existencia. Tras el plazo legal, el titular ya no puede reclamarlo en juicio, aunque siga existiendo como obligación natural. El capítulo destaca que esta distinción protege la estabilidad del tráfico jurídico."
+},
+
+{
+  tema: 8,
+  text: "La prescripción liberatoria beneficia principalmente a:",
+  options: [
+    "El acreedor",
+    "El deudor",
+    "La Administración"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La prescripción liberatoria actúa en favor del deudor al permitirle oponer la inactividad del acreedor como defensa. Este mecanismo evita reclamaciones tardías y favorece la certeza en las relaciones jurídicas. De ahí su conexión con la seguridad jurídica y la paz social."
+},
+
+{
+  tema: 8,
+  text: "El fundamento principal de la prescripción, según la doctrina, es:",
+  options: [
+    "La moralidad del titular",
+    "La seguridad jurídica derivada del paso del tiempo",
+    "La necesidad de sancionar toda deuda impagada"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo destaca que la prescripción responde al interés social en estabilizar relaciones jurídicas evitando que las pretensiones se mantengan indefinidas. El tiempo borra incertidumbres, dificulta la prueba y exige cerrar situaciones jurídicas. Este principio se vincula estrechamente con la paz social."
+},
+
+{
+  tema: 8,
+  text: "En la prescripción extintiva, la carga de alegarla recae en:",
+  options: [
+    "El juez de oficio",
+    "El deudor o persona a quien favorece",
+    "El Ministerio Fiscal"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La prescripción debe ser alegada por la parte interesada, conforme al art. 1935 CC. No puede aplicarse de oficio porque supone renunciar a un derecho de defensa. El capítulo subraya que este carácter dispositivo refuerza la idea de que la prescripción es una excepción y no una invalidez automática."
+},
+
+{
+  tema: 8,
+  text: "¿Qué función tiene la interrupción de la prescripción?",
+  options: [
+    "Acortar el plazo legal",
+    "Hacer que el tiempo transcurrido deje de contar y comience uno nuevo",
+    "Convertir la obligación en natural"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La interrupción supone borrar el tiempo ya transcurrido y reiniciar el cómputo desde cero. Puede producirse por reconocimiento del deudor, por ejercicio judicial o por requerimiento extrajudicial fehaciente. Esta regla busca evitar que la pasividad del acreedor perjudique injustamente sus derechos cuando sí realiza actos de reclamación."
+},
+
+{
+  tema: 8,
+  text: "Según el capítulo, la interrupción civil exige:",
+  options: [
+    "Cualquier comunicación informal entre las partes",
+    "Reclamación judicial del derecho",
+    "Consentimiento del deudor"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La interrupción civil se produce por el ejercicio judicial de la acción mediante demanda, reconvención o actos procesales equivalentes. Su eficacia no depende del resultado del proceso: basta la manifestación expresa del ejercicio del derecho. Es el modo más seguro y pleno de interrupción."
+},
+
+{
+  tema: 8,
+  text: "La interrupción natural de la prescripción requiere:",
+  options: [
+    "El reconocimiento del derecho por el titular",
+    "La imposibilidad física del deudor",
+    "El reconocimiento del derecho por parte del deudor"
+  ],
+  correctIndex: 2,
+  explanation:
+    "La interrupción natural opera cuando el deudor reconoce, expresa o tácitamente, la existencia del derecho del acreedor. Este reconocimiento puede manifestarse mediante pagos parciales, solicitudes de plazo o declaraciones explícitas. El capítulo destaca que rompe la lógica de inactividad que justifica la prescripción."
+},
+
+{
+  tema: 8,
+  text: "El cómputo del plazo de prescripción comienza:",
+  options: [
+    "Siempre desde la publicación de la ley",
+    "Desde que puede ejercitarse la acción",
+    "Desde que el deudor tiene conocimiento del derecho"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El principio general es que la prescripción comienza cuando la acción puede ejercitarse, es decir, cuando se cumplen los presupuestos del derecho. Este criterio evita injusticias como iniciar el plazo antes de que el acreedor pueda reclamar. El capítulo subraya que esta regla se recoge en el art. 1969 CC."
+},
+
+{
+  tema: 8,
+  text: "La caducidad, a diferencia de la prescripción:",
+  options: [
+    "No admite interrupción",
+    "Siempre es favorable al acreedor",
+    "Puede ser alegada únicamente por el juez"
+  ],
+  correctIndex: 0,
+  explanation:
+    "La caducidad extingue un derecho por el mero transcurso de un plazo perentorio fijado por la ley o las partes. Este plazo no admite interrupción, pues responde a intereses superiores de certeza y estabilidad. La naturaleza perentoria de la caducidad exige especial diligencia al titular."
+},
+
+{
+  tema: 8,
+  text: "El fundamento principal de la caducidad es:",
+  options: [
+    "Castigar al deudor",
+    "La necesidad de mantener plazos breves y seguros para el tráfico jurídico",
+    "Evitar el enriquecimiento injusto"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La caducidad responde a intereses de orden público o de seguridad jurídica que exigen plazos fijos, especialmente en acciones formativas o constitutivas. El capítulo señala que este mecanismo evita incertidumbre y garantiza estabilidad en relaciones jurídicas especialmente sensibles, como familia o sucesiones."
+},
+
+{
+  tema: 8,
+  text: "Una diferencia esencial entre prescripción y caducidad es que:",
+  options: [
+    "La prescripción puede apreciarse de oficio y la caducidad no",
+    "La caducidad puede apreciarse de oficio y la prescripción debe ser alegada",
+    "Ambas requieren la alegación del interesado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La prescripción no puede declararse de oficio: debe invocarla la parte a la que favorece. En cambio, la caducidad puede ser apreciada tanto a instancia de parte como de oficio, dado su carácter imperativo. Esta diferencia refleja la función de orden público de la caducidad frente al carácter dispositivo de la prescripción."
+},
+
+{
+  tema: 8,
+  text: "La prescripción puede renunciarse:",
+  options: [
+    "Antes de que el plazo haya empezado",
+    "Solo después de cumplido el plazo",
+    "En cualquier momento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El art. 1937 CC establece que la prescripción solo puede renunciarse una vez cumplido el plazo. Antes de ello, la renuncia es ineficaz porque frustraría el fundamento de la institución y vaciaría de contenido el régimen de plazos. La renuncia, además, debe respetar los límites generales de la autonomía privada."
+},
+
+{
+  tema: 8,
+  text: "La caducidad se aplica con frecuencia en:",
+  options: [
+    "Acciones reales de larga duración",
+    "Acciones formativas o constitutivas que requieren rapidez",
+    "Derechos de crédito ordinarios"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La caducidad se asocia a acciones que modifican estados jurídicos, como impugnaciones de filiación, ejercicio de opciones contractuales o derechos del heredero. En estos casos, el ordenamiento exige rapidez y certidumbre. El capítulo destaca que un ejercicio tardío afectaría gravemente a la estabilidad del tráfico jurídico."
+},
+
+{
+  tema: 8,
+  text: "En caso de duda entre prescripción y caducidad de un plazo:",
+  options: [
+    "Debe aplicarse siempre la caducidad",
+    "Debe interpretarse como prescripción salvo que la ley indique lo contrario",
+    "Decide el criterio subjetivo del juez"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La doctrina y la jurisprudencia aplican un criterio pro-prescripción: en caso de duda, se considera que el plazo es prescriptivo, ya que la caducidad implica consecuencias más severas. Solo cuando la ley declare expresamente el plazo como caducidad debe aplicarse tal régimen. Este criterio protege al titular del derecho."
+},
+
+{
+  tema: 8,
+  text: "El plazo general de prescripción de las acciones personales tras la reforma de 2015 es:",
+  options: [
+    "15 años",
+    "5 años",
+    "1 año"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La reforma del art. 1964 CC redujo el plazo general de 15 a 5 años para las acciones personales que no tienen plazo especial. El capítulo explica que este cambio buscó aproximar el sistema español al europeo y reducir la inseguridad derivada de plazos excesivamente largos. El cómputo comienza desde que la acción puede ejercitarse."
+},
+
+{
+  tema: 8,
+  text: "La usucapión extraordinaria requiere:",
+  options: [
+    "Posesión de 30 años sin necesidad de buena fe ni justo título",
+    "Buena fe y justo título siempre",
+    "Título inscrito en el Registro"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo recuerda que la usucapión extraordinaria exige únicamente posesión prolongada durante 30 años, sin necesidad de buena fe o justo título. Este largo plazo compensa la menor exigencia cualitativa. Es una herramienta de estabilización del tráfico jurídico y de consolidación dominical."
+},
+
+{
+  tema: 8,
+  text: "La caducidad opera:",
+  options: [
+    "Automáticamente por el mero transcurso del plazo",
+    "Solo si la parte lo alega",
+    "Únicamente por resolución judicial"
+  ],
+  correctIndex: 0,
+  explanation:
+    "A diferencia de la prescripción, la caducidad no requiere alegación. Su efecto se produce automáticamente en virtud del plazo perentorio fijado por la ley o las partes. Esta automaticidad es característica esencial de la institución y asegura la certeza en situaciones jurídicas especialmente sensibles."
+},
+
+{
+  tema: 8,
+  text: "La interrupción de la prescripción por vía extrajudicial requiere:",
+  options: [
+    "Un requerimiento fehaciente del acreedor al deudor",
+    "Una comunicación informal por WhatsApp",
+    "Un reconocimiento judicial del derecho"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El requerimiento fehaciente —normalmente mediante burofax o notificación equivalente— interrumpe la prescripción al manifestar la voluntad inequívoca del acreedor de reclamar su derecho. El capítulo señala que debe cumplir requisitos formales mínimos que permitan acreditar su recepción y contenido."
+},
+
+{
+  tema: 8,
+  text: "La prescripción adquisitiva o usucapión produce:",
+  options: [
+    "La pérdida automática del derecho del poseedor anterior sin más requisitos",
+    "La adquisición de un derecho real por el transcurso del tiempo unido a la posesión",
+    "Un simple efecto declarativo sin consecuencias reales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La usucapión permite adquirir un derecho real sobre un bien cuando concurren posesión pública, pacífica y continuada durante el tiempo legal. El capítulo subraya que constituye una forma originaria de adquisición que protege al poseedor frente a la inactividad del propietario anterior y consolida la estabilidad del tráfico."
+},
+
+{
+  tema: 8,
+  text: "La caducidad puede ser establecida:",
+  options: [
+    "Solo por la ley",
+    "Por la ley o por la voluntad de las partes en ciertos contratos",
+    "Únicamente por acuerdo entre particulares"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Aunque la ley fija la mayor parte de los plazos de caducidad por razones de orden público, las partes pueden acordar plazos perentorios en contratos para el ejercicio de determinados derechos (opciones, retractos convencionales, etc.). En ambos casos, la característica esencial es la improrrogabilidad del plazo."
+},
+// 🟪 TEMA 9 – LOS DERECHOS SUBJETIVOS Y SU TUTELA
+{
+  tema: 9,
+  text: "Según el capítulo, ¿qué es un derecho subjetivo?",
+  options: [
+    "Una expectativa futura de contenido incierto",
+    "La facultad reconocida por el ordenamiento a una persona para satisfacer un interés propio",
+    "Un poder ilimitado del individuo sobre las cosas"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El derecho subjetivo es un poder o facultad otorgado por el ordenamiento jurídico para satisfacer intereses legítimos del titular. No se trata de una potestad arbitraria, sino de una atribución jurídicamente delimitada. El capítulo resalta su carácter relacional y su vinculación a intereses protegidos."
+},
+
+{
+  tema: 9,
+  text: "Los derechos subjetivos, en su estructura, suponen siempre:",
+  options: [
+    "Un poder jurídico del titular frente a un sujeto pasivo",
+    "Una libertad absoluta sin límites",
+    "Una autorización moral no vinculante"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo explica que todo derecho subjetivo implica un vínculo jurídico entre un titular activo y un obligado pasivo, ya sea determinado o indeterminado. Este vínculo genera deberes correlativos y permite exigir prestaciones o respetos. El derecho subjetivo no existe en aislamiento, sino dentro de una relación jurídica."
+},
+
+{
+  tema: 9,
+  text: "En el sistema civil, los límites de los derechos subjetivos derivan principalmente de:",
+  options: [
+    "La voluntad unilateral del titular",
+    "La ley, la moral y el orden público",
+    "El criterio del juez en cada caso"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que los derechos subjetivos no son absolutos: deben ejercerse conforme a la ley, con respeto a la moral y sin vulnerar el orden público. Estos límites impiden un uso antisocial o abusivo del derecho. El control de estos límites garantiza la convivencia y la justicia."
+},
+
+{
+  tema: 9,
+  text: "El abuso de derecho se caracteriza por:",
+  options: [
+    "Ejercer un derecho en beneficio propio con la finalidad normal prevista",
+    "Ejercer un derecho excediendo manifiestamente los límites impuestos por la buena fe o la función social",
+    "Ejercer un derecho con desconocimiento de la ley"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El abuso de derecho implica un uso anómalo del poder jurídico, contrario a su finalidad natural y lesivo para terceros. El art. 7 CC impone límites derivados de la buena fe y la función social del derecho. El capítulo destaca que se trata de un mecanismo antifraude que impide utilizar la ley para fines contrarios al sistema."
+},
+
+{
+  tema: 9,
+  text: "La figura del fraude de ley supone:",
+  options: [
+    "Aplicar una norma de forma incorrecta",
+    "Utilizar una norma para eludir la aplicación de otra de carácter imperativo",
+    "Errar en la interpretación de la norma aplicable"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El fraude de ley se produce cuando se usa una norma de cobertura para lograr un resultado prohibido por otra norma imperativa. El art. 6.4 CC sanciona esta conducta aplicando la norma eludida. El capítulo subraya que protege la coherencia del sistema y evita manipulaciones del ordenamiento."
+},
+
+{
+  tema: 9,
+  text: "La tutela preventiva de los derechos se orienta a:",
+  options: [
+    "Reparar un daño ya producido",
+    "Evitar la lesión futura del derecho mediante medidas cautelares o acciones inhibitorias",
+    "Incrementar las sanciones civiles"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La tutela preventiva actúa antes de que el daño se produzca, buscando impedir la vulneración del derecho. El capítulo menciona medidas cautelares, acciones de cesación y otras herramientas cuyo fin es evitar perjuicios irreparables. Es una parte esencial de la protección civil moderna."
+},
+
+{
+  tema: 9,
+  text: "La tutela resarcitoria persigue:",
+  options: [
+    "Proteger la posesión del titular",
+    "Obtener una indemnización equivalente al daño sufrido",
+    "Suspender temporalmente el ejercicio del derecho"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Cuando se produce un daño antijurídico, la tutela resarcitoria busca restablecer el equilibrio patrimonial mediante una compensación económica. El capítulo explica que esta forma de tutela no siempre repara totalmente la lesión, pero constituye el mecanismo típico de responsabilidad civil."
+},
+
+{
+  tema: 9,
+  text: "La acción declarativa tiene por finalidad:",
+  options: [
+    "Modificar un estado jurídico",
+    "Proteger la apariencia posesoria",
+    "Obtener un pronunciamiento judicial que confirme la existencia o alcance de un derecho"
+  ],
+  correctIndex: 2,
+  explanation:
+    "Las acciones declarativas clarifican el contenido, existencia o alcance de un derecho sin pretender modificar la realidad material. Son esenciales para eliminar incertidumbres jurídicas, especialmente en materia de derechos reales y personales. El capítulo resalta su importancia para la seguridad jurídica."
+},
+
+{
+  tema: 9,
+  text: "La acción constitutiva se dirige a:",
+  options: [
+    "Obtener una mera declaración judicial",
+    "Producir la creación, modificación o extinción de una relación jurídica",
+    "Recuperar el dominio de un bien"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las acciones constitutivas tienen efectos jurídicos directos sobre la relación jurídica, como sucede en divorcio, nulidad, opción de compra o rescisión. El capítulo indica que estas acciones requieren intervención judicial para que el cambio jurídico produzca efectos, reflejando su carácter formativo."
+},
+
+{
+  tema: 9,
+  text: "La acción de condena exige:",
+  options: [
+    "Una simple declaración de derecho",
+    "Una modificación del estado civil",
+    "La imposición judicial de una prestación a cargo del demandado"
+  ],
+  correctIndex: 2,
+  explanation:
+    "La acción de condena persigue que el juez imponga al demandado una obligación concreta: pagar, entregar, hacer o no hacer. El capítulo aclara que este tipo de acción es la base de la ejecución forzosa posterior. Es la más común dentro de la tutela resarcitoria y la protección de créditos."
+},
+
+{
+  tema: 9,
+  text: "El derecho al juez ordinario predeterminado por la ley implica:",
+  options: [
+    "Elegir libremente al juez",
+    "Ser juzgado por el órgano judicial competente según reglas objetivas",
+    "Ser juzgado por un tribunal de excepción"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que este principio garantiza que toda persona sea juzgada por el juez establecido por normas de competencia previas al proceso, evitando tribunales ad hoc. Forma parte del derecho fundamental a la tutela judicial efectiva del art. 24 CE y asegura imparcialidad y legalidad."
+},
+
+{
+  tema: 9,
+  text: "La carga de la prueba corresponde según el art. 217 LEC:",
+  options: [
+    "Siempre al demandado",
+    "A quien afirma los hechos base de su pretensión o excepción",
+    "Exclusivamente al juez"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La carga de la prueba recae sobre quien sostiene los hechos constitutivos de su pretensión o los impeditivos/extintivos en caso de excepción. El capítulo destaca que este reparto evita decisiones arbitrarias y obliga a cada parte a acreditar sus afirmaciones, reforzando la seguridad jurídica del proceso civil."
+},
+
+{
+  tema: 9,
+  text: "La tutela judicial efectiva del art. 24 CE garantiza:",
+  options: [
+    "El derecho absoluto a obtener la estimación de la demanda",
+    "El acceso a los tribunales y a obtener una resolución fundada en Derecho",
+    "La gratuidad universal del proceso"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo expone que el derecho a la tutela judicial efectiva incluye el acceso a la jurisdicción, la defensa, la prueba y una resolución motivada. No garantiza el éxito de la pretensión, sino un proceso justo. Este principio ordena todo el sistema de protección de derechos subjetivos."
+},
+
+{
+  tema: 9,
+  text: "La autotutela privada está prohibida salvo:",
+  options: [
+    "En casos expresamente autorizados por la ley, como la legítima defensa o la retención legal",
+    "Cuando el titular considere que es justo",
+    "Cuando el juez no esté disponible"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo recuerda que la autotutela —imposición unilateral de la propia razón— está prohibida como regla general por razones de orden público. Solo procede en supuestos expresamente autorizados por la ley, como la legítima defensa, retención legal o ciertas facultades de autoprotección posesorias."
+},
+
+{
+  tema: 9,
+  text: "Los derechos subjetivos pueden clasificarse según:",
+  options: [
+    "Su origen histórico exclusivamente",
+    "Distinciones como patrimoniales/extrapatrimoniales o absolutos/relativos",
+    "La tradición constitucional"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo organiza los derechos subjetivos atendiendo a criterios funcionales: patrimoniales o no patrimoniales, absolutos (frente a todos) o relativos (frente a sujetos determinados). Esta clasificación permite entender mejor sus efectos, límites y mecanismos de protección."
+},
+
+{
+  tema: 9,
+  text: "Los derechos absolutos se caracterizan por:",
+  options: [
+    "Ser oponibles únicamente a personas determinadas",
+    "Ser oponibles erga omnes y exigir respeto general",
+    "Extinguirse automáticamente con el paso del tiempo"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos absolutos son exigibles frente a todos: propiedad, derechos de la personalidad, posesión. El capítulo explica que su protección se articula mediante acciones de carácter real o posesoria. Esta oponibilidad general distingue los derechos absolutos de los relativos o personales."
+},
+
+{
+  tema: 9,
+  text: "Los derechos relativos o de crédito se caracterizan por:",
+  options: [
+    "Su oponibilidad general",
+    "Vincular a un acreedor y un deudor determinados",
+    "Convertirse automáticamente en propiedad"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos relativos solo son exigibles frente al deudor u obligados concretos. Se basan en un vínculo obligacional que genera prestaciones específicas. El capítulo destaca que estos derechos necesitan acciones personales para su tutela y no imponen un deber general de respeto."
+},
+
+{
+  tema: 9,
+  text: "Las acciones posesorias protegen:",
+  options: [
+    "El dominio civil",
+    "La mera posesión y su apariencia exterior",
+    "La buena fe del propietario"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Las acciones posesorias defienden la posesión frente a perturbaciones o despojos, con independencia del derecho de propiedad. El capítulo subraya que buscan mantener la paz social y la estabilidad del tráfico evitando que los particulares se tomen la justicia por su mano. Son instrumentos de tutela provisional poderosa."
+},
+
+{
+  tema: 9,
+  text: "El ejercicio de un derecho debe cumplir el principio de buena fe, que supone:",
+  options: [
+    "El cumplimiento meramente formal de la norma",
+    "Actuar con lealtad, corrección y respeto a las expectativas legítimas",
+    "La protección del interés exclusivo del titular"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La buena fe objetiva exige comportamientos coherentes, leales y respetuosos con la confianza creada en las relaciones jurídicas. El capítulo insiste en que la buena fe limita el abuso de derecho y orienta la interpretación y aplicación de las normas. Su incumplimiento puede generar responsabilidad."
+},
+
+{
+  tema: 9,
+  text: "La responsabilidad civil derivada del ejercicio anómalo de un derecho procede cuando:",
+  options: [
+    "El titular actúa dentro de la finalidad normal del derecho",
+    "El ejercicio causa un daño antijurídico y puede calificarse como abuso o fraude",
+    "El ejercicio es beneficioso para terceros"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que el uso irregular de un derecho —abuso, fraude de ley o actuación contra la buena fe— puede generar responsabilidad por los daños causados. Este régimen garantiza que el derecho no sea un instrumento para perjudicar injustamente a terceros. La responsabilidad actúa como refuerzo de los límites objetivos."
+},
+// 🟥 TEMA 10 – LOS DERECHOS DE LA PERSONALIDAD
+
+{
+  tema: 10,
+  text: "¿Qué caracteriza a los derechos de la personalidad según el capítulo?",
+  options: [
+    "Son derechos patrimoniales transmisibles",
+    "Son derechos inherentes a la persona, irrenunciables e intransmisibles",
+    "Son facultades de contenido exclusivamente económico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Los derechos de la personalidad protegen aspectos esenciales de la dignidad humana: vida, integridad, honor, intimidad e imagen. Se caracterizan por ser inherentes al individuo, intransmisibles y fuera del comercio jurídico. El capítulo recalca su conexión con derechos fundamentales constitucionales."
+},
+
+{
+  tema: 10,
+  text: "El derecho a la vida, según el capítulo, constituye:",
+  options: [
+    "Un derecho disponible por acuerdo entre particulares",
+    "El presupuesto ontológico de todos los demás derechos",
+    "Un derecho patrimonial embargable"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El derecho a la vida es fundamento y condición de posibilidad de cualquier otro derecho subjetivo. Su protección es absoluta frente a atentados externos, aunque admite límites en contextos como la interrupción voluntaria del embarazo conforme a la legislación vigente. El capítulo destaca su centralidad en el sistema civil y constitucional."
+},
+
+{
+  tema: 10,
+  text: "El derecho a la integridad física implica:",
+  options: [
+    "La libre disposición del propio cuerpo sin límite",
+    "La protección frente a lesiones, tratamientos forzosos y experimentación no consentida",
+    "La obligación de someterse a tratamientos médicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que la integridad física garantiza que nadie pueda alterar el cuerpo ajeno sin consentimiento válido. Se prohíben intervenciones coactivas, salvo supuestos legales como tratamientos obligatorios en salud pública. También impide experimentaciones no consentidas, reforzando la autonomía corporal."
+},
+
+{
+  tema: 10,
+  text: "El consentimiento informado en intervenciones médicas se fundamenta en:",
+  options: [
+    "La disponibilidad absoluta de la vida",
+    "La autonomía de la voluntad y el derecho a decidir sobre el propio cuerpo",
+    "La obligación del médico de actuar siempre sin consultar"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Se trata de un principio jurídico y ético que exige al profesional suministrar información adecuada para que la persona decida libremente si acepta o no la intervención. El capítulo subraya que deriva del derecho a la integridad física y moral. Sin este consentimiento, la intervención puede constituir ilícito civil o penal."
+},
+
+{
+  tema: 10,
+  text: "El derecho a la integridad moral protege frente a:",
+  options: [
+    "Daños corporales exclusivamente",
+    "Tratos degradantes o actos que afecten a la dignidad psicológica de la persona",
+    "Actos administrativos ordinarios"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La integridad moral protege el equilibrio emocional y la dignidad espiritual del individuo. Incluye la prohibición de tratos humillantes, degradantes o atentatorios contra la salud mental. El capítulo explica que su contenido se ha ampliado con la jurisprudencia constitucional en ámbitos como escolar, sanitario y laboral."
+},
+
+{
+  tema: 10,
+  text: "El derecho al honor se define como:",
+  options: [
+    "La reputación o valoración social de la dignidad de la persona",
+    "Un derecho exclusivamente económico",
+    "Una facultad para impedir la crítica"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo describe el honor como la estimación social y personal de la dignidad. Incluye protección frente a expresiones injuriosas, calumnias o informaciones falsas que dañen la reputación. No impide la crítica legítima en un marco de libertad de expresión, pero sí los ataques innecesarios a la dignidad."
+},
+
+{
+  tema: 10,
+  text: "El derecho a la intimidad consiste en:",
+  options: [
+    "Impedir siempre la difusión de datos públicos",
+    "Garantizar un ámbito reservado frente a intromisiones ajenas",
+    "Evitar que terceros opinen sobre asuntos públicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La intimidad protege la esfera personal y familiar frente a injerencias ilegítimas. El capítulo explica que abarca datos médicos, vida afectiva, creencias o hábitos personales. Su finalidad es preservar la autonomía personal en aspectos que no deben ser objeto de exposición pública, salvo consentimiento del titular."
+},
+
+{
+  tema: 10,
+  text: "El derecho a la propia imagen comprende:",
+  options: [
+    "Solo la protección frente a fotografías",
+    "La facultad de decidir sobre la reproducción, difusión o captación de la imagen",
+    "Un derecho sin relación con la intimidad"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El derecho a la imagen incluye controlar el uso del aspecto físico identificable de la persona: fotografías, vídeos y representaciones. Su protección se extiende tanto a la captación como a la difusión. El capítulo destaca su autonomía respecto al honor e intimidad, aunque confrecuencia se vinculan."
+},
+
+{
+  tema: 10,
+  text: "El derecho al olvido digital implica:",
+  options: [
+    "Borrar la historia real del individuo",
+    "Controlar la permanencia en internet de informaciones que han perdido relevancia o afectan desproporcionadamente",
+    "Impedir cualquier tratamiento de datos personales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El derecho al olvido permite solicitar la supresión o desindexación de informaciones obsoletas o irrelevantes que afectan a la reputación. No pretende reescribir la realidad, sino preservar la dignidad frente a la permanencia ilimitada de datos online. El capítulo lo vincula a la protección de datos y al RGPD."
+},
+
+{
+  tema: 10,
+  text: "La Ley Orgánica 1/1982 considera intromisión ilegítima:",
+  options: [
+    "La difusión de hechos veraces siempre",
+    "La captación o divulgación de imágenes en lugares privados sin consentimiento",
+    "La crítica política de cargos públicos"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La LO 1/1982 tipifica como intromisión la captación, reproducción o difusión de imágenes en espacios reservados sin autorización. También protege la intimidad y el honor frente a revelaciones innecesarias. El capítulo destaca que incluso los personajes públicos conservan un ámbito mínimo de privacidad."
+},
+
+{
+  tema: 10,
+  text: "Los derechos de la personalidad son irrenunciables porque:",
+  options: [
+    "Lo establece la ley penal",
+    "Protegen valores fundamentales ligados a la dignidad humana",
+    "Lo exige el mercado económico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Estos derechos no pueden renunciarse ni transmitirse porque están íntimamente unidos a la condición humana, no al patrimonio. El capítulo aclara que su núcleo esencial es indisponible incluso por el titular, evitando abusos o sometimientos que comprometan la dignidad."
+},
+
+{
+  tema: 10,
+  text: "El consentimiento para difundir la imagen ajena:",
+  options: [
+    "Debe ser siempre expreso y formal",
+    "Puede ser expreso o tácito, pero debe ser inequívoco y específico",
+    "No es necesario si la fotografía es antigua"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que el consentimiento puede deducirse de comportamientos del titular, pero siempre debe ser claro, concreto y referirse a fines determinados. La ambigüedad o generalidad en la autorización puede invalidarla. Además, puede revocarse cuando afecte a la dignidad o a la intimidad."
+},
+
+{
+  tema: 10,
+  text: "El uso de cámaras de videovigilancia exige:",
+  options: [
+    "Consentimiento individual siempre",
+    "Información visible previa y respeto a los límites de proporcionalidad",
+    "Autorización judicial en todo caso"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El uso de videovigilancia para fines de seguridad requiere avisos claros y visibles, y debe respetar la proporcionalidad entre la finalidad y la captación de imágenes. El capítulo explica que no se exige consentimiento individual, pero sí límites estrictos para evitar intromisiones ilegítimas en la intimidad."
+},
+
+{
+  tema: 10,
+  text: "El derecho al honor puede ceder ante la libertad de expresión cuando:",
+  options: [
+    "El afectado sea una persona anónima",
+    "Se trate de informaciones veraces y de relevancia pública",
+    "La crítica sea molesta para el afectado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo describe que la libertad de expresión prevalece cuando la información es veraz, está contrastada y posee interés general. Sin embargo, no legitima insultos ni expresiones vejatorias. Los tribunales ponderan ambos derechos para evitar abusos de uno sobre otro, especialmente en materia política."
+},
+
+{
+  tema: 10,
+  text: "La protección civil de los derechos de la personalidad permite:",
+  options: [
+    "Solo reclamar indemnización",
+    "Cesar la intromisión, impedir futuras lesiones e indemnizar daños",
+    "Exigir responsabilidad penal inmediatamente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La protección civil incluye acciones de cesación, prohibición, rectificación e indemnización de daños morales y materiales. El capítulo recalca que la tutela civil es flexible y se adapta al caso concreto. Permite restaurar la dignidad y reparar las consecuencias de la intromisión ilegítima."
+},
+
+{
+  tema: 10,
+  text: "La indemnización por daño moral en intromisiones ilegítimas:",
+  options: [
+    "Requiere prueba directa del sufrimiento",
+    "Se presume cuando existe intromisión acreditada",
+    "Solo procede si hay perjuicio económico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que no es posible exigir una prueba plena del sufrimiento emocional, por lo que la jurisprudencia presume el daño moral cuando se acredita la intromisión ilegítima. La indemnización se fija atendiendo a gravedad, repercusión y circunstancias personales del afectado."
+},
+
+{
+  tema: 10,
+  text: "La rectificación de informaciones inexactas es:",
+  options: [
+    "Una forma de censura",
+    "Una garantía constitucional para corregir datos incorrectos difundidos por medios de comunicación",
+    "Una potestad exclusiva de los jueces"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La rectificación permite al afectado corregir informaciones inexactas que dañen su honor o reputación. El capítulo destaca su valor constitucional como instrumento equilibrador entre libertad de información y protección de derechos personales. No suprime la noticia, sino que añade la versión del afectado."
+},
+
+{
+  tema: 10,
+  text: "Los datos personales especialmente sensibles (salud, ideología, vida sexual…) requieren:",
+  options: [
+    "Un nivel de protección reforzado y consentimiento expreso para su tratamiento",
+    "Un régimen común de datos ordinarios",
+    "Que sean siempre públicos por interés general"
+  ],
+  correctIndex: 0,
+  explanation:
+    "El capítulo recoge que los datos especialmente sensibles tienen un régimen reforzado en la normativa de protección de datos. Su tratamiento exige consentimiento expreso o habilitación legal muy estricta. La finalidad es evitar discriminación o vulneración grave de la intimidad."
+},
+
+{
+  tema: 10,
+  text: "El derecho al nombre implica:",
+  options: [
+    "Que el nombre sea elegido libremente sin límites",
+    "La identificación jurídica de la persona y la imposibilidad de usurpación por terceros",
+    "La posibilidad de cambiar de nombre sin procedimiento"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el nombre es un atributo esencial de la personalidad que individualiza al sujeto en la sociedad y en el tráfico jurídico. Su protección incluye acciones contra la suplantación o uso indebido. Su modificación requiere procedimiento legal, evitando fraudes o confusiones."
+},
+
+{
+  tema: 10,
+  text: "Los títulos nobiliarios y tratamientos honoríficos, según el capítulo:",
+  options: [
+    "Constituyen derechos de la personalidad",
+    "Son meras distinciones honoríficas sin contenido jurídico de derecho subjetivo",
+    "Generan relaciones obligatorias"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo recuerda que los títulos nobiliarios no son derechos de la personalidad ni forman parte del estado civil. Son distinciones honoríficas sometidas a normas específicas, pero carecen del carácter inherente, inalienable y no patrimonial de los derechos de la personalidad."
+},
+// 🟦 TEMA 11 – LA PERSONA FÍSICA: MAYORÍA DE EDAD, CAPACIDAD, EMANCIPACIÓN Y EVOLUCIÓN HISTÓRICA
+
+{
+  tema: 11,
+  text: "Según el capítulo, la mayoría de edad en el sistema español se alcanza:",
+  options: [
+    "A los 16 años con consentimiento de los padres",
+    "A los 18 años, otorgando plena capacidad de obrar",
+    "A los 21 años, salvo casos excepcionales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Constitución de 1978 fijó la mayoría de edad en los 18 años, lo que implica plena capacidad para realizar actos jurídicos sin asistencia. El capítulo resalta que esta edad responde a criterios de madurez cívica y responsabilidad. A partir de ese momento, el individuo asume todas las consecuencias jurídicas de su conducta."
+},
+
+{
+  tema: 11,
+  text: "La minoría de edad implica:",
+  options: [
+    "Incapacidad absoluta para realizar actos jurídicos",
+    "Capacidad limitada que requiere representación o asistencia en la mayoría de actos",
+    "Plena capacidad salvo actos patrimoniales de alto valor"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo subraya que el menor tiene capacidad natural progresiva, pero necesita representación —normalmente por los progenitores— para la mayoría de los actos. Puede realizar por sí mismo actos personales y cotidianos conforme a su madurez. La protección del menor estructura todo el régimen jurídico."
+},
+
+{
+  tema: 11,
+  text: "La capacidad progresiva del menor se funda en:",
+  options: [
+    "Una regla matemática basada únicamente en la edad",
+    "La combinación entre edad, desarrollo y madurez real del menor",
+    "El consentimiento judicial automático"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La capacidad progresiva reconoce que el menor adquiere autonomía de forma gradual. El capítulo explica que no basta la edad cronológica: se valora su grado real de comprensión, especialmente en decisiones personales como tratamientos médicos o consentimiento en datos. Este enfoque está reforzado por la LO 1/1996."
+},
+
+{
+  tema: 11,
+  text: "La Ley 8/2021 sobre capacidad jurídica establece:",
+  options: [
+    "La sustitución plena de la voluntad del discapacitado",
+    "Un modelo basado en apoyos para el ejercicio de la capacidad jurídica",
+    "La incapacitación judicial como regla general"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Ley 8/2021 transformó por completo el régimen de la discapacidad, sustituyendo el antiguo modelo de incapacitación por un sistema de apoyos personalizado. El capítulo explica que la capacidad jurídica es igual para todos, pero algunos precisan ayuda para ejercerla. Se trata de un cambio alineado con la Convención de Nueva York."
+},
+
+{
+  tema: 11,
+  text: "La emancipación produce como efecto principal:",
+  options: [
+    "Plena capacidad sin límite alguno",
+    "Que el menor actúe como mayor de edad salvo en actos especialmente relevantes",
+    "La ruptura automática de la convivencia familiar"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La emancipación permite al menor casi plena capacidad de obrar, pero mantiene restricciones en actos como tomar dinero a préstamo, gravar bienes o enajenar inmuebles. El capítulo destaca que la emancipación no convierte al menor en mayor pleno, sino en un sujeto casi autónomo pero aún sujeto a determinados controles."
+},
+
+{
+  tema: 11,
+  text: "La emancipación por concesión de los padres requiere:",
+  options: [
+    "Autorización judicial siempre",
+    "Que el menor tenga al menos 16 años y el consentimiento de quienes ejerzan la patria potestad",
+    "Que el menor sea autosuficiente económicamente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La concesión voluntaria exige edad mínima de 16 años y acuerdo de quienes ejerzan la patria potestad. Debe inscribirse en el Registro Civil para ser eficaz frente a terceros. El capítulo destaca que este mecanismo otorga autonomía reforzada al menor, especialmente para su vida cotidiana y laboral."
+},
+
+{
+  tema: 11,
+  text: "La emancipación por matrimonio:",
+  options: [
+    "Es automática desde la celebración válida del matrimonio",
+    "Requiere autorización judicial adicional",
+    "Solo produce efectos patrimoniales"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El Código Civil establece que el matrimonio produce emancipación automática, siempre que se celebre válidamente. El capítulo explica que esta forma de emancipación se vincula a la asunción de un nuevo proyecto vital y responsabilidades propias de los adultos, aunque se mantienen algunas limitaciones típicas de la emancipación."
+},
+
+{
+  tema: 11,
+  text: "La vida independiente como causa de emancipación exige:",
+  options: [
+    "La simple salida del domicilio familiar",
+    "Consentimiento de los progenitores o del tutor y medios suficientes para mantenerse",
+    "Una resolución judicial aprobatoria"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la emancipación por vida independiente se produce cuando el menor, con consentimiento de padres o tutor, vive y se mantiene por su cuenta. Esta modalidad reconoce la madurez fáctica del menor y su capacidad para gestionar una vida autónoma. No se presume: debe acreditarse."
+},
+
+{
+  tema: 11,
+  text: "La historia del estatus jurídico de la mujer en España muestra que:",
+  options: [
+    "Goza de plena igualdad desde el siglo XIX",
+    "Ha pasado de un régimen de subordinación a uno de igualdad constitucional plena",
+    "Ha mantenido siempre derechos equivalentes a los del varón"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo expone una evolución que va desde la subordinación civil (especialmente en el Código Civil de 1889) hacia la igualdad material garantizada por la Constitución de 1978. Se mencionan hitos como las reformas de 1932, la etapa regresiva del franquismo y la posterior recuperación de derechos civiles y laborales."
+},
+
+{
+  tema: 11,
+  text: "Durante la Segunda República, la mujer española obtuvo:",
+  options: [
+    "Pleno acceso a cargos e igualdad matrimonial",
+    "El derecho de sufragio y avances significativos en capacidad jurídica",
+    "Solo mejoras simbólicas sin contenido práctico"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo destaca que la Segunda República reconoció el sufragio femenino, elevó la autonomía jurídica de la mujer casada y modernizó aspectos de derecho de familia. Aunque estas reformas fueron intensamente debatidas, supusieron una ruptura respecto al modelo patriarcal del Código Civil original."
+},
+
+{
+  tema: 11,
+  text: "Durante el régimen franquista, la capacidad jurídica de la mujer:",
+  options: [
+    "Se mantuvo igual que en la República",
+    "Sufrió graves restricciones, especialmente para la mujer casada",
+    "Se amplió notablemente en el ámbito laboral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que el franquismo reinstauró un modelo de dependencia, donde la mujer casada necesitaba autorización marital para trabajar, firmar contratos o administrar bienes. Este retroceso anuló los avances republicanos hasta la llegada de las reformas de los años 70 y, sobre todo, de la Constitución de 1978."
+},
+
+{
+  tema: 11,
+  text: "La Constitución de 1978 introdujo respecto al estatus jurídico de la mujer:",
+  options: [
+    "Una igualdad meramente formal",
+    "Una igualdad constitucional plena con proyección en todo el Derecho privado",
+    "Una igualdad limitada al ámbito laboral"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La Constitución establece la igualdad real entre hombres y mujeres, lo que obliga a revisar toda la legislación civil para eliminar discriminaciones. El capítulo explica que esta igualdad tiene fuerza expansiva: influye en patria potestad, matrimonio, capacidad y derechos de la personalidad."
+},
+
+{
+  tema: 11,
+  text: "La tutela de los menores según la LO 1/1996 se orienta a:",
+  options: [
+    "Reforzar el poder de los padres",
+    "Proteger el interés superior del menor como principio rector",
+    "Garantizar la autoridad absoluta del tutor"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la LO 1/1996 y sus reformas posteriores han situado el interés superior del menor como criterio decisivo en cualquier actuación administrativa o judicial. Esto implica ponderar necesidades afectivas, educativas, sanitarias y de autonomía progresiva, superando visiones patrimonialistas antiguas."
+},
+
+{
+  tema: 11,
+  text: "La incapacitación judicial tradicional desaparece con la Ley 8/2021 y se sustituye por:",
+  options: [
+    "Medidas de representación plena",
+    "Un sistema de apoyos individualizado respetuoso con la voluntad y preferencias",
+    "La tutela obligatoria para todo discapacitado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo destaca que el nuevo sistema reconoce que toda persona tiene capacidad jurídica, aunque algunas necesiten asistencia para ejercerla. Los apoyos pueden ser informativos, acompañamiento o salvaguardias, pero siempre respetando la voluntad. Es un cambio estructural alineado con la Convención de Nueva York."
+},
+
+{
+  tema: 11,
+  text: "El ejercicio de la patria potestad tras las reformas actuales se caracteriza por:",
+  options: [
+    "Un poder absoluto del padre",
+    "Una función compartida y orientada al interés del menor",
+    "Una función meramente económica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "La patria potestad se concibe como un conjunto de deberes y facultades orientadas al cuidado integral del menor: alimentos, educación, formación y representación. El capítulo insiste en la corresponsabilidad de ambos progenitores, reforzada por el principio de igualdad constitucional."
+},
+
+{
+  tema: 11,
+  text: "La capacidad para otorgar consentimiento médico del menor depende:",
+  options: [
+    "Exclusivamente de haber cumplido 16 años",
+    "De su madurez real y comprensión del tratamiento",
+    "De la presencia obligatoria de los padres"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que la capacidad sanitaria del menor responde al criterio de madurez progresiva. Aunque la ley fija referencias de edad (como los 16 años), la clave es su comprensión real del procedimiento. En situaciones graves, la decisión final puede ponderar su interés superior."
+},
+
+{
+  tema: 11,
+  text: "La interdicción civil tradicionalmente implicaba:",
+  options: [
+    "Un régimen de apoyo flexible",
+    "La sustitución plena de la voluntad por parte de tutor o curador",
+    "La plena autonomía del afectado"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo recuerda que la interdicción suponía la sustitución total de la capacidad del discapacitado por el tutor. Este enfoque ha sido abolido por la Ley 8/2021 por ser incompatible con la dignidad y la igualdad jurídica. Hoy se busca respetar la voluntad de la persona, proporcionando apoyos adecuados."
+},
+
+{
+  tema: 11,
+  text: "La emancipación no permite al menor:",
+  options: [
+    "Celebrar contratos laborales",
+    "Tomar dinero a préstamo o gravar bienes sin consentimiento",
+    "Residír independientemente"
+  ],
+  correctIndex: 1,
+  explanation:
+    "Aunque la emancipación otorga una autonomía amplia, el capítulo señala que persisten restricciones en actos patrimoniales de especial riesgo, como préstamos, hipotecas o enajenación de inmuebles. Estas limitaciones buscan evitar abusos y proteger al menor de decisiones económicamente perjudiciales."
+},
+
+{
+  tema: 11,
+  text: "La transexualidad, según el capítulo, se entiende jurídicamente como:",
+  options: [
+    "Una simple preferencia subjetiva sin efecto legal",
+    "Una vivencia identitaria que permite la adecuación registral del sexo conforme a la legislación vigente",
+    "Una patología psiquiátrica"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo señala que la legislación reconoce la identidad de género como expresión de la dignidad personal. Las leyes permiten la rectificación registral del sexo sin necesidad de cirugía u hormonación, eliminando visiones patologizantes antiguas. Es un ámbito donde confluyen derechos de la personalidad y libertad individual."
+},
+
+{
+  tema: 11,
+  text: "La igualdad efectiva entre hombres y mujeres en el Derecho civil actual se garantiza mediante:",
+  options: [
+    "Declaraciones simbólicas sin reforma normativa",
+    "Revisión integral de instituciones como matrimonio, patria potestad y capacidad",
+    "Preferencia legal del varón en el ámbito patrimonial"
+  ],
+  correctIndex: 1,
+  explanation:
+    "El capítulo explica que la igualdad real obliga a eliminar cualquier discriminación directa o indirecta. Esto ha supuesto reformar instituciones históricas que situaban a la mujer en posición subordinada. La igualdad de ambos cónyuges, corresponsabilidad parental y autonomía patrimonial son ahora pilares del sistema civil."
+}
+
+  /* ===================== ... HASTA EL TEMA 14 ... ===================== */
+
+];
+
+// =====================================================
+// GENERADOR DE IDs
+// =====================================================
+masterQuestions.forEach((q, i) => q.id = i + 1);
+
+// =====================================================
+// UTILIDADES
+// =====================================================
+function $(id){ return document.getElementById(id); }
+
+function shuffle(a){
+  for(let i=a.length-1;i>0;i--){
+    const j=Math.floor(Math.random()*(i+1));
+    [a[i],a[j]]=[a[j],a[i]];
+  }
+  return a;
+}
+
+let selectedQuestions = [];
+let currentIndex = 0;
+let totalCorrect = 0;
+let totalWrong = 0;
+// ================== CRONÓMETRO ==================
+let EXAM_SECONDS = 30 * 60; // 30 minutos de examen
+let remainingSeconds = 0;
+let timerInterval = null;
+let currentOptions = []; // opciones mezcladas de la pregunta actual
+
+function updateLiveScore(){
+  const puntosAciertos = totalCorrect * 0.5;
+  const puntosFallos   = totalWrong * 0.25;
+
+  let notaActual = puntosAciertos - puntosFallos;
+  if (notaActual < 0) notaActual = 0;
+
+  notaActual = Math.round(notaActual * 100) / 100;
+
+  $("liveScore").innerHTML =
+    "Aciertos: " + totalCorrect +
+    " · Fallos: " + totalWrong +
+    " · Nota provis.: " + notaActual.toFixed(2) + " / 10";
+}
+function updateTimerDisplay(){
+  const m = Math.floor(remainingSeconds / 60);
+  const s = remainingSeconds % 60;
+  const mm = String(m).padStart(2, "0");
+  const ss = String(s).padStart(2, "0");
+  $("timer").innerHTML = "Tiempo: " + mm + ":" + ss;
+}
+function startTimer(){
+  // por si hubiera uno antiguo
+  if (timerInterval) {
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  remainingSeconds = EXAM_SECONDS;
+  updateTimerDisplay();
+
+  timerInterval = setInterval(function(){
+    remainingSeconds--;
+    updateTimerDisplay();
+
+    if (remainingSeconds <= 0){
+      clearInterval(timerInterval);
+      timerInterval = null;
+      timeIsOver();
+    }
+  }, 1000);
+}
+function timeIsOver(){
+  // Desactivar todas las respuestas
+  const btns = document.querySelectorAll(".option");
+  btns.forEach(b => b.disabled = true);
+
+  $("feedback").innerHTML =
+    "<span style='color:red;'>Tiempo agotado. Se cierra el examen.</span>";
+
+  // Mostrar el resultado con lo que lleves
+  showResult();
+}
+
+// INICIAR EXAMEN (SIN REPETIR)
+// =====================================================
+$("restartBtn").onclick = function(){
+  const tema = $("temaSelect").value;
+
+  let candidates = (tema === "all")
+    ? [...masterQuestions]
+    : masterQuestions.filter(q => q.tema == tema);
+
+  // preguntas que aún no he usado
+  let remaining = candidates.filter(q => !usedIds.includes(q.id));
+
+  // si ya he usado todas, reseteo el historial y vuelvo a empezar
+  if (remaining.length === 0){
+    usedIds = [];
+    remaining = candidates;
+  }
+
+  // barajar
+  shuffle(remaining);
+
+  // seleccionar hasta el máximo de preguntas del examen
+  selectedQuestions = remaining.length > MAX_EXAM_QUESTIONS
+    ? remaining.slice(0, MAX_EXAM_QUESTIONS)
+    : remaining;
+
+  // reiniciar índices y marcador
+  currentIndex  = 0;
+  totalCorrect  = 0;
+  totalWrong    = 0;
+
+  // 🔵 OCULTAR INSTRUCCIONES AL EMPEZAR
+  $("instrucciones").style.display = "none";
+
+  // (opcional) ocultar también el selector de tema
+  // $("temaSelect").style.display = "none";
+
+  // mostrar el contenedor del examen
+  $("questionContainer").style.display = "block";
+
+  // ⏱ ARRANCAR EL CRONÓMETRO
+  startTimer();
+
+  // actualizar marcador de aciertos/fallos/nota provisoria
+  updateLiveScore();
+
+  // cargar la primera pregunta
+  loadQuestion();
+};
+// =====================================================
+// CARGAR PREGUNTA
+// =====================================================
+// =====================================================
+// CARGAR PREGUNTA (con respuestas aleatorias)
+// =====================================================
+function loadQuestion(){
+  const q = selectedQuestions[currentIndex];
+
+  // Cabecera (nº de pregunta)
+  $("questionCounter").innerHTML =
+    "Pregunta " + (currentIndex + 1) + " de " + selectedQuestions.length;
+
+  // Limpiar zona de trabajo
+  $("questionText").innerHTML   = q.text;
+  $("options").innerHTML        = "";
+  $("feedback").innerHTML       = "";
+  $("explanation").innerHTML    = "";
+  $("finalResult").innerHTML    = "";
+  $("nextBtn").style.display    = "none";
+  $("explanation").style.display = "block";
+
+  // 1) Creamos copia con índice original
+  const opcionesMezcladas = q.options.map((texto, i) => ({
+    texto: texto,
+    indexOriginal: i
+  }));
+
+  // 2) Mezclamos
+  for (let i = opcionesMezcladas.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [opcionesMezcladas[i], opcionesMezcladas[j]] =
+      [opcionesMezcladas[j], opcionesMezcladas[i]];
+  }
+
+  // 3) Guardamos el orden mezclado en una variable global
+  currentOptions = opcionesMezcladas;
+
+  // 4) Pintamos botones
+  opcionesMezcladas.forEach(op => {
+    const btn = document.createElement("button");
+    btn.className = "option";
+    btn.innerHTML = op.texto;
+    btn.onclick = () => handleAnswer(op.indexOriginal);
+    $("options").appendChild(btn);
+  });
+} // 👈 ESTA LLAVE ES LA QUE TE FALTABA
+// =====================================================
+// RESPUESTA
+// =====================================================
+function handleAnswer(idx){
+  const q    = selectedQuestions[currentIndex];
+  const btns = document.querySelectorAll(".option");
+
+  btns.forEach((b, i) => {
+    b.disabled = true; // bloquear todas
+
+    const optInfo = currentOptions[i]; // info de la opción que está en ese botón
+
+    // pintar en verde la opción correcta (la que tenga el índice original correcto)
+    if (optInfo.indexOriginal === q.correctIndex){
+      b.classList.add("correct");
+    }
+
+    // si esta opción es la que ha elegido el usuario y NO es correcta → roja
+    if (optInfo.indexOriginal === idx && idx !== q.correctIndex){
+      b.classList.add("incorrect");
+    }
+  });
+
+  // Lógica de aciertos/fallos
+  if (idx === q.correctIndex){
+    totalCorrect++;
+    $("feedback").innerHTML =
+      "<span style='color:green;'>¡Correcto!</span>";
+  } else {
+    totalWrong++;
+    $("feedback").innerHTML =
+      "<span style='color:red;'>Incorrecto</span>";
+  }
+
+  updateLiveScore();
+  $("explanation").innerHTML = q.explanation;
+
+  $("nextBtn").innerHTML =
+    (currentIndex === selectedQuestions.length - 1)
+      ? "Ver resultado"
+      : "Siguiente";
+
+  $("nextBtn").style.display = "inline-block";
+  $("nextBtn").onclick = nextQuestion;
+}
+// =====================================================
+// SIGUIENTE
+// =====================================================
+function nextQuestion(){
+  currentIndex++;
+  if(currentIndex>=selectedQuestions.length){
+    showResult();
+    return;
+  }
+  loadQuestion();
+}
+
+// =====================================================
+// RESULTADO
+// =====================================================
+function showResult(){
+  // ⏱ DETENER EL CRONÓMETRO SI ESTÁ ACTIVO
+  if (timerInterval){
+    clearInterval(timerInterval);
+    timerInterval = null;
+  }
+
+  $("questionText").innerHTML = "";
+  $("options").innerHTML = "";
+  $("feedback").innerHTML = "";
+  $("explanation").innerHTML = "";
+  $("nextBtn").style.display = "none";
+
+  // Cambiar el texto superior
+  $("questionCounter").innerHTML = "✅ Examen finalizado";
+
+  // Ocultar recuadro de explicación
+  $("explanation").style.display = "none";
+
+  // Registrar preguntas usadas
+  selectedQuestions.forEach(q=>{
+    if(!usedIds.includes(q.id)) usedIds.push(q.id);
+  });
+
+  const total = selectedQuestions.length;
+
+  // 🎯 SISTEMA REAL DE EXAMEN
+  const puntosAciertos = totalCorrect * 0.5;
+  const puntosFallos  = totalWrong * 0.25;
+
+  let notaFinal = puntosAciertos - puntosFallos;
+
+  // Si sale negativo, la nota mínima es 0
+  if (notaFinal < 0) notaFinal = 0;
+
+  // Redondeo a 2 decimales
+  notaFinal = Math.round(notaFinal * 100) / 100;
+
+  // Calificación
+  let calificacion = "";
+  if (notaFinal < 5)       calificacion = "Suspenso";
+  else if (notaFinal < 7)  calificacion = "Aprobado";
+  else if (notaFinal < 9)  calificacion = "Notable";
+  else                     calificacion = "Sobresaliente";
+
+  $("finalResult").innerHTML =
+    "<b>Aciertos:</b> " + totalCorrect + "<br>" +
+    "<b>Fallos:</b> " + totalWrong + "<br>" +
+    "<b>Preguntas totales:</b> " + total + "<br><br>" +
+    "<b>Nota final:</b> " + notaFinal.toFixed(2) + " / 10 (" + calificacion + ")";
+}
+</script>
+</body>
+</html>
